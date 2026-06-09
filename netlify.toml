@@ -1,8 +1,9 @@
 # Netlify config for mika-bakery (monorepo: only deploy this subfolder)
-# NOTE: `ignore` runs from `base` (defaults to repo root), and `publish` is
-# relative to `base`. We deliberately keep base = repo root so the ignore
-# path stays simple and obvious.
+# NOTE: Both `publish` and `ignore` are interpreted relative to `base`.
+# We pin base = "." (repo root) here so that any leftover base value in the
+# Netlify UI is overridden — toml beats UI.
 [build]
+  base    = "."
   publish = "mika-bakery"
   # Skip the deploy if no files changed inside mika-bakery/ since the previous commit.
   # `git diff --quiet` exits 0 (skip) when there are no differences, 1 (build) otherwise.
