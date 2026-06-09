@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧮 משחק חשבון 🌟</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rubik', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            font-size: 20px;
+            animation: twinkle 3s infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 520px;
+            width: 90%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .title {
+            font-size: 2.2em;
+            color: #764ba2;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: #999;
+            margin-bottom: 30px;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 25px;
+        }
+
+        .score-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 10px 25px;
+            border-radius: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .score-item span {
+            color: #764ba2;
+            font-size: 1.3em;
+        }
+
+        .problem {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin: 25px 0;
+            direction: ltr;
+        }
+
+        .number-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 3em;
+            font-weight: 700;
+            width: 95px;
+            height: 95px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            animation: popIn 0.5s ease;
+        }
+
+        .operator {
+            font-size: 3em;
+            font-weight: 700;
+            color: #764ba2;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .equals-sign {
+            font-size: 3em;
+            font-weight: 700;
+            color: #764ba2;
+        }
+
+        .answer-input {
+            font-size: 2.5em;
+            font-weight: 700;
+            width: 95px;
+            height: 95px;
+            text-align: center;
+            border: 4px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+            color: #333;
+            transition: border-color 0.3s;
+            direction: ltr;
+        }
+
+        .answer-input:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 15px rgba(118, 75, 162, 0.3);
+        }
+
+        .answer-input.correct {
+            border-color: #4CAF50;
+            background-color: #e8f5e9;
+            animation: correctPulse 0.5s ease;
+        }
+
+        .answer-input.wrong {
+            border-color: #f44336;
+            background-color: #ffebee;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-10px); }
+            80% { transform: translateX(10px); }
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.3em;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'Rubik', Arial, sans-serif;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .feedback {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-top: 20px;
+            min-height: 50px;
+            transition: all 0.3s;
+        }
+
+        .feedback.correct {
+            color: #4CAF50;
+            animation: bounceIn 0.5s ease;
+        }
+
+        .feedback.wrong {
+            color: #f44336;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .visual-dots {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 15px 0;
+            direction: ltr;
+        }
+
+        .dot-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+            max-width: 120px;
+        }
+
+        .dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: inline-block;
+            animation: dotPop 0.3s ease forwards;
+            opacity: 0;
+        }
+
+        .dot.group-a {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .dot.group-b {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        @keyframes dotPop {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .streak {
+            margin-top: 15px;
+            font-size: 1.2em;
+            color: #ff9800;
+            font-weight: 600;
+            min-height: 30px;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: confettiFall 2s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        .help-toggle {
+            background: none;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            font-size: 1.1em;
+            cursor: pointer;
+            color: #999;
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            transition: all 0.3s;
+            font-family: 'Rubik', Arial, sans-serif;
+        }
+
+        .help-toggle:hover {
+            border-color: #764ba2;
+            color: #764ba2;
+        }
+
+        .help-text {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .help-text.show {
+            display: block;
+        }
+
+        /* Mode selector */
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .mode-btn {
+            background: #f0f0f0;
+            border: 3px solid #ddd;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Rubik', Arial, sans-serif;
+            color: #777;
+            transition: all 0.3s;
+        }
+
+        .mode-btn:hover {
+            border-color: #764ba2;
+            color: #764ba2;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .range-btn {
+            background: #f0f0f0;
+            border: 3px solid #ddd;
+            padding: 8px 16px;
+            font-size: 1em;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Rubik', Arial, sans-serif;
+            color: #777;
+            transition: all 0.3s;
+        }
+
+        .range-btn:hover {
+            border-color: #ff9800;
+            color: #ff9800;
+        }
+
+        .range-btn.active {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        /* Subtraction crossed-out dots */
+        .dot.crossed {
+            position: relative;
+            opacity: 0.4;
+        }
+
+        .dot.crossed::after {
+            content: '✕';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            font-weight: bold;
+            color: #f44336;
+            line-height: 1;
+        }
+
+        /* Smiley popup */
+        .smiley-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 8em;
+            z-index: 200;
+            pointer-events: none;
+            animation: smileyBounce 1.2s ease forwards;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
+        }
+
+        @keyframes smileyBounce {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(-20deg); opacity: 0; }
+            30% { transform: translate(-50%, -50%) scale(1.4) rotate(10deg); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.1) rotate(-5deg); opacity: 1; }
+            70% { transform: translate(-50%, -50%) scale(1.2) rotate(3deg); opacity: 1; }
+            100% { transform: translate(-50%, -80%) scale(0.5) rotate(0deg); opacity: 0; }
+        }
+
+        /* Hide number input arrows */
+        .answer-input::-webkit-outer-spin-button,
+        .answer-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .answer-input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    <div class="celebration" id="celebration"></div>
+
+    <div class="container">
+        <button class="help-toggle" onclick="toggleHelp()">?</button>
+        <div class="title">🧮 משחק חשבון 🌟</div>
+        <div class="subtitle">!בואי נתרגל חיבור וחיסור</div>
+
+        <div class="help-text" id="helpText">
+            📝 <strong>איך משחקים?</strong><br>
+            🔢 כתבי את התשובה בתוך הריבוע<br>
+            ⌨️ לחצי Enter או על הכפתור לבדיקה<br>
+            ➕ חיבור - כמה ביחד?<br>
+            ➖ חיסור - כמה נשאר?<br>
+            🌟 על כל תשובה נכונה מקבלים נקודה<br>
+            🔥 רצף תשובות נכונות = בונוס!
+        </div>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" id="modeBoth" onclick="setMode('both')">➕➖ הכל</button>
+            <button class="mode-btn" id="modeAdd" onclick="setMode('add')">➕ חיבור</button>
+            <button class="mode-btn" id="modeSub" onclick="setMode('sub')">➖ חיסור</button>
+        </div>
+
+        <div class="mode-selector">
+            <button class="range-btn" id="range10" onclick="setRange(10)">עד 10</button>
+            <button class="range-btn active" id="range20" onclick="setRange(20)">עד 20</button>
+            <button class="range-btn" id="range50" onclick="setRange(50)">עד 50</button>
+            <button class="range-btn" id="range100" onclick="setRange(100)">עד 100</button>
+        </div>
+
+        <div class="mode-selector">
+            <button class="range-btn active" id="dotsOn" onclick="toggleDots(true)">🔵 עם עיגולים</button>
+            <button class="range-btn" id="dotsOff" onclick="toggleDots(false)">🚫 בלי עיגולים</button>
+        </div>
+
+        <div class="score-board">
+            <div class="score-item">✅ נכון: <span id="correctCount">0</span></div>
+            <div class="score-item">📝 שאלות: <span id="totalCount">0</span></div>
+        </div>
+
+        <div class="visual-dots" id="visualDots"></div>
+
+        <div class="problem">
+            <div class="number-box" id="num1">?</div>
+            <div class="operator" id="operator">+</div>
+            <div class="number-box" id="num2">?</div>
+            <div class="equals-sign">=</div>
+            <input type="number" class="answer-input" id="answer" min="0" max="20" autocomplete="off">
+        </div>
+
+        <button class="btn" onclick="checkAnswer()">בדיקה ✨</button>
+
+        <div class="feedback" id="feedback"></div>
+        <div class="streak" id="streak"></div>
+    </div>
+
+    <script>
+        let num1, num2, correctAnswer;
+        let correctCount = 0;
+        let totalCount = 0;
+        let streak = 0;
+        let waiting = false;
+        let mode = 'both'; // 'add', 'sub', or 'both'
+        let currentOp = '+';
+        let maxResult = 20;
+        let showDots = true;
+
+        // Audio context for sound effects
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function ensureAudio() {
+            if (!audioCtx) audioCtx = new AudioCtx();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playCorrectSound() {
+            ensureAudio();
+            const t = audioCtx.currentTime;
+
+            // Layer 1: Bright fanfare melody C-E-G-C (high)
+            const melody = [523.25, 659.25, 783.99, 1046.50];
+            melody.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.25, t + i * 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + i * 0.1 + 0.4);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(t + i * 0.1);
+                osc.stop(t + i * 0.1 + 0.4);
+            });
+
+            // Layer 2: Harmony notes (thirds) for richness
+            const harmony = [659.25, 783.99, 987.77, 1318.51];
+            harmony.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.12, t + i * 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + i * 0.1 + 0.35);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(t + i * 0.1);
+                osc.stop(t + i * 0.1 + 0.35);
+            });
+
+            // Layer 3: Sparkle — high twinkle notes
+            const sparkle = [1567.98, 2093.00, 2637.02];
+            sparkle.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.08, t + 0.3 + i * 0.08);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3 + i * 0.08 + 0.25);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(t + 0.3 + i * 0.08);
+                osc.stop(t + 0.3 + i * 0.08 + 0.25);
+            });
+
+            // Layer 4: Warm bass note for fullness
+            const bass = audioCtx.createOscillator();
+            const bassGain = audioCtx.createGain();
+            bass.type = 'triangle';
+            bass.frequency.value = 261.63; // C4
+            bassGain.gain.setValueAtTime(0.15, t);
+            bassGain.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
+            bass.connect(bassGain);
+            bassGain.connect(audioCtx.destination);
+            bass.start(t);
+            bass.stop(t + 0.6);
+        }
+
+        function playWrongSound() {
+            ensureAudio();
+            // Descending "womp womp"
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.4);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
+        }
+
+        function showSmiley() {
+            const smileys = ['😄', '🥳', '😊', '🤩', '😁', '💖', '🌟'];
+            const smiley = document.createElement('div');
+            smiley.className = 'smiley-popup';
+            smiley.textContent = smileys[Math.floor(Math.random() * smileys.length)];
+            document.body.appendChild(smiley);
+            setTimeout(() => smiley.remove(), 1300);
+        }
+
+        const feedbackCorrect = [
+            "!🌟 כל הכבוד",
+            "!🎉 מצוין",
+            "!💪 יופי של תשובה",
+            "!⭐ נכון מאוד",
+            "!🏆 מעולה",
+            "!👏 את כוכבת",
+            "!🌈 נהדר",
+            "!🎯 בול פגיעה",
+        ];
+
+        const feedbackWrong = [
+            "🤔 נסי שוב",
+            "💪 כמעט! נסי עוד פעם",
+            "🌟 לא נורא, נסי שוב",
+        ];
+
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const emojis = ['⭐', '✨', '🌟', '💫'];
+            for (let i = 0; i < 20; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.fontSize = (15 + Math.random() * 20) + 'px';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        function setMode(newMode) {
+            mode = newMode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('mode' + newMode.charAt(0).toUpperCase() + newMode.slice(1)).classList.add('active');
+            // Reset scores on mode change
+            correctCount = 0;
+            totalCount = 0;
+            streak = 0;
+            document.getElementById('correctCount').textContent = '0';
+            document.getElementById('totalCount').textContent = '0';
+            document.getElementById('streak').textContent = '';
+            generateProblem();
+        }
+
+        function toggleDots(on) {
+            showDots = on;
+            document.getElementById('dotsOn').classList.toggle('active', on);
+            document.getElementById('dotsOff').classList.toggle('active', !on);
+            renderDots();
+        }
+
+        function setRange(newMax) {
+            maxResult = newMax;
+            document.querySelectorAll('.range-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('range' + newMax).classList.add('active');
+            document.getElementById('answer').max = newMax;
+            correctCount = 0;
+            totalCount = 0;
+            streak = 0;
+            document.getElementById('correctCount').textContent = '0';
+            document.getElementById('totalCount').textContent = '0';
+            document.getElementById('streak').textContent = '';
+            generateProblem();
+        }
+
+        function generateProblem() {
+            // Decide operation
+            if (mode === 'add') {
+                currentOp = '+';
+            } else if (mode === 'sub') {
+                currentOp = '-';
+            } else {
+                currentOp = Math.random() < 0.5 ? '+' : '-';
+            }
+
+            if (currentOp === '+') {
+                // Addition: sum ≤ maxResult
+                num1 = Math.floor(Math.random() * (maxResult + 1));
+                num2 = Math.floor(Math.random() * (maxResult - num1 + 1));
+                correctAnswer = num1 + num2;
+            } else {
+                // Subtraction: result ≥ 0, num1 up to maxResult
+                num1 = Math.floor(Math.random() * (maxResult + 1));
+                num2 = Math.floor(Math.random() * (num1 + 1));
+                correctAnswer = num1 - num2;
+            }
+
+            document.getElementById('num1').textContent = num1;
+            document.getElementById('num2').textContent = num2;
+            document.getElementById('operator').textContent = currentOp;
+
+            const answerInput = document.getElementById('answer');
+            answerInput.value = '';
+            answerInput.className = 'answer-input';
+            answerInput.focus();
+
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').className = 'feedback';
+
+            renderDots();
+            waiting = false;
+        }
+
+        function renderDots() {
+            const container = document.getElementById('visualDots');
+            container.innerHTML = '';
+
+            // Skip dots if toggled off or numbers too large
+            if (!showDots || maxResult > 20) return;
+
+            if (currentOp === '+') {
+                // Addition: two groups of dots
+                const groupA = document.createElement('div');
+                groupA.className = 'dot-group';
+                for (let i = 0; i < num1; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot group-a';
+                    dot.style.animationDelay = (i * 0.05) + 's';
+                    groupA.appendChild(dot);
+                }
+
+                const groupB = document.createElement('div');
+                groupB.className = 'dot-group';
+                for (let i = 0; i < num2; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot group-b';
+                    dot.style.animationDelay = (i * 0.05 + 0.2) + 's';
+                    groupB.appendChild(dot);
+                }
+
+                container.appendChild(groupA);
+                container.appendChild(groupB);
+            } else {
+                // Subtraction: show num1 dots, cross out num2 of them
+                const group = document.createElement('div');
+                group.className = 'dot-group';
+                group.style.maxWidth = '200px';
+                for (let i = 0; i < num1; i++) {
+                    const dot = document.createElement('div');
+                    // Cross out the last num2 dots
+                    if (i >= num1 - num2) {
+                        dot.className = 'dot group-b crossed';
+                    } else {
+                        dot.className = 'dot group-a';
+                    }
+                    dot.style.animationDelay = (i * 0.05) + 's';
+                    group.appendChild(dot);
+                }
+                container.appendChild(group);
+            }
+        }
+
+        function checkAnswer() {
+            if (waiting) {
+                generateProblem();
+                return;
+            }
+
+            const answerInput = document.getElementById('answer');
+            const userAnswer = parseInt(answerInput.value);
+            const feedback = document.getElementById('feedback');
+
+            if (isNaN(userAnswer)) {
+                feedback.textContent = '✏️ כתבי מספר';
+                feedback.className = 'feedback wrong';
+                return;
+            }
+
+            totalCount++;
+            document.getElementById('totalCount').textContent = totalCount;
+
+            if (userAnswer === correctAnswer) {
+                correctCount++;
+                streak++;
+                document.getElementById('correctCount').textContent = correctCount;
+                answerInput.className = 'answer-input correct';
+                feedback.textContent = feedbackCorrect[Math.floor(Math.random() * feedbackCorrect.length)];
+                feedback.className = 'feedback correct';
+                playCorrectSound();
+                showSmiley();
+
+                if (streak >= 3) {
+                    document.getElementById('streak').textContent = '🔥 רצף של ' + streak + ' תשובות נכונות!';
+                    launchConfetti();
+                } else {
+                    document.getElementById('streak').textContent = '';
+                }
+
+                if (streak % 5 === 0 && streak > 0) {
+                    launchConfetti();
+                }
+
+                waiting = true;
+                setTimeout(() => {
+                    generateProblem();
+                }, 1500);
+            } else {
+                streak = 0;
+                answerInput.className = 'answer-input wrong';
+                feedback.textContent = feedbackWrong[Math.floor(Math.random() * feedbackWrong.length)];
+                feedback.className = 'feedback wrong';
+                playWrongSound();
+                document.getElementById('streak').textContent = '';
+
+                setTimeout(() => {
+                    answerInput.value = '';
+                    answerInput.className = 'answer-input';
+                    answerInput.focus();
+                }, 1000);
+            }
+        }
+
+        function launchConfetti() {
+            const celebration = document.getElementById('celebration');
+            const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#00bcd4', '#4caf50', '#ff9800', '#ff5722'];
+
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-10px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                confetti.style.width = (5 + Math.random() * 10) + 'px';
+                confetti.style.height = (5 + Math.random() * 10) + 'px';
+                celebration.appendChild(confetti);
+
+                setTimeout(() => confetti.remove(), 2500);
+            }
+        }
+
+        function toggleHelp() {
+            const helpText = document.getElementById('helpText');
+            helpText.classList.toggle('show');
+        }
+
+        // Keyboard support
+        document.getElementById('answer').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        // Init
+        createStars();
+        generateProblem();
+    </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+# macOS junk
+.DS_Store
+**/.DS_Store
+
+# Claude Code local-only settings (machine-specific permissions/paths)
+.claude/settings.local.json
+
+# Editor noise
+.vscode/
+.idea/
+*.swp
+*~

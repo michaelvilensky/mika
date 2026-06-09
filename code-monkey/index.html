@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐵 קוף קוד 🍌</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Rubik', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a7a3a 0%, #0d5c2a 50%, #134e2b 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            max-width: 520px;
+            width: 100%;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        .header-title {
+            font-size: 2em;
+            font-weight: 800;
+            color: #2d6a1e;
+            margin-bottom: 5px;
+        }
+
+        .header-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 1em;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .header-stats span { color: #e67e22; }
+
+        /* Level info */
+        .level-info {
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 12px 18px;
+            margin-bottom: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .level-name {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #2d6a1e;
+        }
+
+        .level-hint {
+            font-size: 0.95em;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* Grid */
+        .grid-wrapper {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 3px;
+            width: 100%;
+            max-width: 390px;
+            aspect-ratio: 1;
+            direction: ltr;
+        }
+
+        .cell {
+            background: #90d46b;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: min(2em, 7vw);
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .cell:nth-child(odd) { background: #82c95e; }
+
+        .cell.wall {
+            background: #5a8a3c;
+        }
+
+        .cell.visited {
+            background: #ffe082;
+        }
+
+        .cell.visited:nth-child(odd) {
+            background: #ffd54f;
+        }
+
+        .cell .direction-arrow {
+            font-size: 0.4em;
+            line-height: 1;
+            margin-top: -3px;
+        }
+
+        .cell.error-cell {
+            animation: cellShake 0.4s ease;
+        }
+
+        @keyframes cellShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            50% { transform: translateX(4px); }
+            75% { transform: translateX(-4px); }
+        }
+
+        /* Command palette */
+        .command-palette {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .cmd-btn {
+            flex: 1;
+            max-width: 160px;
+            padding: 12px 8px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1em;
+            font-weight: 700;
+            font-family: 'Rubik', Arial, sans-serif;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .cmd-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+        .cmd-btn:active { transform: translateY(0); }
+        .cmd-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .cmd-btn.forward { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+        .cmd-btn.turn-right { background: linear-gradient(135deg, #2980b9, #3498db); }
+        .cmd-btn.turn-left { background: linear-gradient(135deg, #e67e22, #f39c12); }
+
+        /* Program area */
+        .program-area {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 12px;
+            margin-bottom: 12px;
+            min-height: 60px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .program-label {
+            font-size: 0.9em;
+            color: #999;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .program-commands {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            min-height: 36px;
+        }
+
+        .program-cmd {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 0.85em;
+            font-weight: 600;
+            color: white;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            animation: cmdPop 0.2s ease;
+        }
+
+        .program-cmd:hover { transform: scale(1.05); }
+        .program-cmd .cmd-num {
+            font-size: 0.7em;
+            opacity: 0.8;
+            background: rgba(0,0,0,0.2);
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .program-cmd .cmd-remove {
+            font-size: 0.7em;
+            opacity: 0.7;
+            margin-right: -4px;
+            margin-left: 2px;
+        }
+
+        .program-cmd.forward { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+        .program-cmd.turn-right { background: linear-gradient(135deg, #2980b9, #3498db); }
+        .program-cmd.turn-left { background: linear-gradient(135deg, #e67e22, #f39c12); }
+        .program-cmd.running { outline: 3px solid #f1c40f; box-shadow: 0 0 15px rgba(241,196,15,0.6); transform: scale(1.1); }
+
+        @keyframes cmdPop {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .program-empty {
+            color: #ccc;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 10px;
+        }
+
+        /* Action buttons */
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .action-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 700;
+            font-family: 'Rubik', Arial, sans-serif;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .action-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+        .action-btn:active { transform: translateY(0); }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .run-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            flex: 2;
+        }
+
+        .clear-btn {
+            background: #ecf0f1;
+            color: #666;
+        }
+
+        .reset-btn {
+            background: #ecf0f1;
+            color: #666;
+        }
+
+        /* Error message */
+        .error-msg {
+            text-align: center;
+            color: #e74c3c;
+            font-weight: 700;
+            font-size: 1.1em;
+            min-height: 30px;
+            margin-bottom: 8px;
+        }
+
+        /* Level complete overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .overlay.show { display: flex; }
+
+        .modal {
+            background: white;
+            border-radius: 25px;
+            padding: 35px 40px;
+            text-align: center;
+            max-width: 380px;
+            width: 90%;
+            animation: modalPop 0.4s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        @keyframes modalPop {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .modal-emoji { font-size: 4em; margin-bottom: 10px; }
+        .modal-title { font-size: 1.8em; font-weight: 800; color: #2d6a1e; margin-bottom: 5px; }
+        .modal-stars { font-size: 2.5em; margin: 10px 0; }
+        .modal-msg { font-size: 1em; color: #888; margin-bottom: 20px; }
+
+        .modal-btn {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            font-size: 1.2em;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Rubik', Arial, sans-serif;
+            transition: transform 0.2s;
+        }
+
+        .modal-btn:hover { transform: translateY(-2px); }
+
+        /* Celebration */
+        .celebration {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .confetti {
+            position: absolute;
+            border-radius: 3px;
+            animation: confettiFall 2s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* All levels done */
+        .all-done-emoji { font-size: 3em; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <div class="header-title">🐵 קוף קוד 🍌</div>
+            <div class="header-stats">
+                <div>שלב: <span id="levelNum">1</span> / <span id="totalLevels">8</span></div>
+                <div>⭐ כוכבים: <span id="totalStars">0</span></div>
+            </div>
+        </div>
+
+        <div class="level-info">
+            <div class="level-name" id="levelName"></div>
+            <div class="level-hint" id="levelHint"></div>
+        </div>
+
+        <div class="grid-wrapper">
+            <div class="grid" id="grid"></div>
+        </div>
+
+        <div class="command-palette">
+            <button class="cmd-btn forward" onclick="addCommand('forward')">🏃 קדימה</button>
+            <button class="cmd-btn turn-right" onclick="addCommand('right')">↩️ ימינה</button>
+            <button class="cmd-btn turn-left" onclick="addCommand('left')">↪️ שמאלה</button>
+        </div>
+
+        <div class="program-area">
+            <div class="program-label">📋 התוכנית שלי</div>
+            <div class="program-commands" id="programList"></div>
+        </div>
+
+        <div class="error-msg" id="errorMsg"></div>
+
+        <div class="actions">
+            <button class="action-btn run-btn" id="runBtn" onclick="runProgram()">▶️ הפעלה</button>
+            <button class="action-btn clear-btn" onclick="clearProgram()">🗑️ נקה</button>
+            <button class="action-btn reset-btn" onclick="resetLevel()">↩️ אפס</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay">
+        <div class="modal">
+            <div class="modal-emoji" id="modalEmoji">🎉</div>
+            <div class="modal-title" id="modalTitle">!כל הכבוד</div>
+            <div class="modal-stars" id="modalStars"></div>
+            <div class="modal-msg" id="modalMsg"></div>
+            <button class="modal-btn" id="modalBtn" onclick="nextLevel()">?שלב הבא ➡️</button>
+        </div>
+    </div>
+
+    <div class="celebration" id="celebration"></div>
+
+    <script>
+        // === DIRECTIONS ===
+        const DIRS = [
+            { dc: 0, dr: -1 },  // 0: up
+            { dc: 1, dr: 0 },   // 1: right
+            { dc: 0, dr: 1 },   // 2: down
+            { dc: -1, dr: 0 }   // 3: left
+        ];
+        const DIR_ARROWS = ['⬆️', '➡️', '⬇️', '⬅️'];
+        const GRID_SIZE = 6;
+
+        const CMD_NAMES = {
+            forward: '🏃 קדימה',
+            right: '↩️ ימינה',
+            left: '↪️ שמאלה'
+        };
+
+        // === LEVELS ===
+        const levels = [
+            {
+                name: "צעדים ראשונים",
+                hint: "!לחצי על 'קדימה' כדי להזיז את הקוף",
+                monkey: { col: 1, row: 2, dir: 1 },
+                banana: { col: 4, row: 2 },
+                walls: [],
+                optimal: 3
+            },
+            {
+                name: "!עוד קדימה",
+                hint: "!הבננה רחוקה, המשיכי קדימה",
+                monkey: { col: 0, row: 3, dir: 1 },
+                banana: { col: 5, row: 3 },
+                walls: [],
+                optimal: 5
+            },
+            {
+                name: "!פונים ימינה",
+                hint: "'נסי להשתמש ב'ימינה",
+                monkey: { col: 2, row: 1, dir: 1 },
+                banana: { col: 4, row: 3 },
+                walls: [],
+                optimal: 5
+            },
+            {
+                name: "!פונים שמאלה",
+                hint: "'נסי להשתמש ב'שמאלה",
+                monkey: { col: 2, row: 4, dir: 1 },
+                banana: { col: 4, row: 2 },
+                walls: [],
+                optimal: 5
+            },
+            {
+                name: "צורת ל",
+                hint: "!קדימה ואז סיבוב",
+                monkey: { col: 1, row: 1, dir: 2 },
+                banana: { col: 4, row: 4 },
+                walls: [],
+                optimal: 7
+            },
+            {
+                name: "!זהירות, עץ",
+                hint: "!העץ חוסם את הדרך, עקפי אותו",
+                monkey: { col: 1, row: 2, dir: 1 },
+                banana: { col: 3, row: 2 },
+                walls: [{ col: 2, row: 2 }],
+                optimal: 7
+            },
+            {
+                name: "פנייה מסובכת",
+                hint: "!סובבי פעמיים כדי לחזור",
+                monkey: { col: 1, row: 1, dir: 1 },
+                banana: { col: 1, row: 3 },
+                walls: [],
+                optimal: 8
+            },
+            {
+                name: "דרך ביער",
+                hint: "!מצאי את הדרך מסביב לעץ",
+                monkey: { col: 0, row: 1, dir: 1 },
+                banana: { col: 5, row: 3 },
+                walls: [{ col: 3, row: 1 }],
+                optimal: 9
+            },
+            {
+                name: "שני עצים",
+                hint: "!שני עצים חוסמים, תכנני טוב",
+                monkey: { col: 0, row: 0, dir: 1 },
+                banana: { col: 5, row: 2 },
+                walls: [{ col: 2, row: 0 }, { col: 4, row: 2 }],
+                optimal: 10
+            },
+            {
+                name: "!האתגר הגדול",
+                hint: "?את מסוגלת",
+                monkey: { col: 0, row: 0, dir: 2 },
+                banana: { col: 5, row: 5 },
+                walls: [{ col: 0, row: 3 }, { col: 3, row: 2 }, { col: 5, row: 3 }],
+                optimal: 12
+            }
+        ];
+
+        // === STATE ===
+        let currentLevel = 0;
+        let program = [];
+        let isRunning = false;
+        let monkeyState = null;
+        let visited = [];
+        let totalStarsCount = 0;
+        let levelStarsArr = new Array(levels.length).fill(0);
+
+        // === AUDIO ===
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function ensureAudio() {
+            if (!audioCtx) audioCtx = new AudioCtx();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playMoveSound() {
+            ensureAudio();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(440, t);
+            osc.frequency.exponentialRampToValueAtTime(600, t + 0.08);
+            gain.gain.setValueAtTime(0.15, t);
+            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.12);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(t);
+            osc.stop(t + 0.12);
+        }
+
+        function playTurnSound() {
+            ensureAudio();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(350, t);
+            osc.frequency.setValueAtTime(500, t + 0.05);
+            gain.gain.setValueAtTime(0.12, t);
+            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(t);
+            osc.stop(t + 0.1);
+        }
+
+        function playErrorSound() {
+            ensureAudio();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(250, t);
+            osc.frequency.exponentialRampToValueAtTime(120, t + 0.3);
+            gain.gain.setValueAtTime(0.2, t);
+            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(t);
+            osc.stop(t + 0.4);
+        }
+
+        function playWinSound() {
+            ensureAudio();
+            const t = audioCtx.currentTime;
+            const melody = [523.25, 659.25, 783.99, 1046.50];
+            melody.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.25, t + i * 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + i * 0.1 + 0.4);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(t + i * 0.1);
+                osc.stop(t + i * 0.1 + 0.4);
+            });
+            const harmony = [659.25, 783.99, 987.77, 1318.51];
+            harmony.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.12, t + i * 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + i * 0.1 + 0.35);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(t + i * 0.1);
+                osc.stop(t + i * 0.1 + 0.35);
+            });
+            const sparkle = [1567.98, 2093.00, 2637.02];
+            sparkle.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.08, t + 0.3 + i * 0.08);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3 + i * 0.08 + 0.25);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(t + 0.3 + i * 0.08);
+                osc.stop(t + 0.3 + i * 0.08 + 0.25);
+            });
+            const bass = audioCtx.createOscillator();
+            const bassGain = audioCtx.createGain();
+            bass.type = 'triangle';
+            bass.frequency.value = 261.63;
+            bassGain.gain.setValueAtTime(0.15, t);
+            bassGain.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
+            bass.connect(bassGain);
+            bassGain.connect(audioCtx.destination);
+            bass.start(t);
+            bass.stop(t + 0.6);
+        }
+
+        function playClickSound() {
+            ensureAudio();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = 800;
+            gain.gain.setValueAtTime(0.1, t);
+            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(t);
+            osc.stop(t + 0.05);
+        }
+
+        // === GRID RENDERING ===
+        function isWall(col, row) {
+            const lvl = levels[currentLevel];
+            return lvl.walls.some(w => w.col === col && w.row === row);
+        }
+
+        function isVisited(col, row) {
+            return visited.some(v => v.col === col && v.row === row);
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('grid');
+            const lvl = levels[currentLevel];
+            let html = '';
+
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    let classes = 'cell';
+                    let content = '';
+
+                    if (isWall(col, row)) {
+                        classes += ' wall';
+                        content = '🌳';
+                    } else if (monkeyState && monkeyState.col === col && monkeyState.row === row) {
+                        if (isVisited(col, row)) classes += ' visited';
+                        content = `🐵<div class="direction-arrow">${DIR_ARROWS[monkeyState.dir]}</div>`;
+                    } else if (lvl.banana.col === col && lvl.banana.row === row) {
+                        content = '🍌';
+                    } else if (isVisited(col, row)) {
+                        classes += ' visited';
+                        content = '👣';
+                    }
+
+                    html += `<div class="${classes}" data-col="${col}" data-row="${row}">${content}</div>`;
+                }
+            }
+
+            grid.innerHTML = html;
+        }
+
+        // === PROGRAM MANAGEMENT ===
+        function addCommand(cmd) {
+            if (isRunning) return;
+            program.push(cmd);
+            playClickSound();
+            renderProgram();
+        }
+
+        function removeCommand(idx) {
+            if (isRunning) return;
+            program.splice(idx, 1);
+            renderProgram();
+        }
+
+        function renderProgram() {
+            const list = document.getElementById('programList');
+
+            if (program.length === 0) {
+                list.innerHTML = '<div class="program-empty">...לחצי על הפקודות למעלה כדי להתחיל</div>';
+                return;
+            }
+
+            let html = '';
+            program.forEach((cmd, i) => {
+                html += `<div class="program-cmd ${cmd === 'forward' ? 'forward' : cmd === 'right' ? 'turn-right' : 'turn-left'}" id="cmd-${i}" onclick="removeCommand(${i})">
+                    <span class="cmd-num">${i + 1}</span>
+                    ${CMD_NAMES[cmd]}
+                    <span class="cmd-remove">✕</span>
+                </div>`;
+            });
+
+            list.innerHTML = html;
+        }
+
+        function clearProgram() {
+            if (isRunning) return;
+            program = [];
+            document.getElementById('errorMsg').textContent = '';
+            renderProgram();
+        }
+
+        // === LEVEL MANAGEMENT ===
+        function loadLevel(idx) {
+            currentLevel = idx;
+            const lvl = levels[idx];
+
+            monkeyState = { ...lvl.monkey };
+            visited = [];
+            program = [];
+            isRunning = false;
+
+            document.getElementById('levelNum').textContent = idx + 1;
+            document.getElementById('totalLevels').textContent = levels.length;
+            document.getElementById('levelName').textContent = lvl.name;
+            document.getElementById('levelHint').textContent = lvl.hint;
+            document.getElementById('errorMsg').textContent = '';
+
+            setButtonsEnabled(true);
+            renderGrid();
+            renderProgram();
+            updateStarsDisplay();
+        }
+
+        function resetLevel() {
+            if (isRunning) return;
+            const lvl = levels[currentLevel];
+            monkeyState = { ...lvl.monkey };
+            visited = [];
+            document.getElementById('errorMsg').textContent = '';
+            renderGrid();
+        }
+
+        function setButtonsEnabled(enabled) {
+            document.querySelectorAll('.cmd-btn').forEach(b => b.disabled = !enabled);
+            document.getElementById('runBtn').disabled = !enabled;
+        }
+
+        function updateStarsDisplay() {
+            document.getElementById('totalStars').textContent = totalStarsCount;
+        }
+
+        // === EXECUTION ===
+        function runProgram() {
+            if (isRunning || program.length === 0) return;
+
+            isRunning = true;
+            setButtonsEnabled(false);
+            document.getElementById('errorMsg').textContent = '';
+
+            // Reset monkey to start
+            const lvl = levels[currentLevel];
+            monkeyState = { ...lvl.monkey };
+            visited = [];
+            renderGrid();
+
+            executeStep(0);
+        }
+
+        function executeStep(stepIdx) {
+            if (stepIdx >= program.length) {
+                // Program finished but didn't reach banana
+                isRunning = false;
+                setButtonsEnabled(true);
+                document.getElementById('errorMsg').textContent = '🤔 הקוף לא הגיע לבננה! נסי שוב';
+                playErrorSound();
+                highlightCommand(-1);
+                return;
+            }
+
+            highlightCommand(stepIdx);
+
+            const cmd = program[stepIdx];
+            const lvl = levels[currentLevel];
+
+            setTimeout(() => {
+                if (cmd === 'forward') {
+                    const dir = DIRS[monkeyState.dir];
+                    const newCol = monkeyState.col + dir.dc;
+                    const newRow = monkeyState.row + dir.dr;
+
+                    // Check bounds
+                    if (newCol < 0 || newCol >= GRID_SIZE || newRow < 0 || newRow >= GRID_SIZE) {
+                        playErrorSound();
+                        document.getElementById('errorMsg').textContent = '🚫 אי אפשר ללכת שם! הקוף יוצא מהמפה';
+                        shakeMonkeyCell();
+                        isRunning = false;
+                        setButtonsEnabled(true);
+                        highlightCommand(-1);
+                        return;
+                    }
+
+                    // Check walls
+                    if (isWall(newCol, newRow)) {
+                        playErrorSound();
+                        document.getElementById('errorMsg').textContent = '🌳 יש עץ בדרך! נסי דרך אחרת';
+                        shakeMonkeyCell();
+                        isRunning = false;
+                        setButtonsEnabled(true);
+                        highlightCommand(-1);
+                        return;
+                    }
+
+                    // Move
+                    visited.push({ col: monkeyState.col, row: monkeyState.row });
+                    monkeyState.col = newCol;
+                    monkeyState.row = newRow;
+                    playMoveSound();
+
+                } else if (cmd === 'right') {
+                    monkeyState.dir = (monkeyState.dir + 1) % 4;
+                    playTurnSound();
+
+                } else if (cmd === 'left') {
+                    monkeyState.dir = (monkeyState.dir + 3) % 4;
+                    playTurnSound();
+                }
+
+                renderGrid();
+
+                // Check win
+                if (monkeyState.col === lvl.banana.col && monkeyState.row === lvl.banana.row) {
+                    highlightCommand(-1);
+                    setTimeout(() => {
+                        isRunning = false;
+                        onLevelComplete();
+                    }, 300);
+                    return;
+                }
+
+                // Next step
+                executeStep(stepIdx + 1);
+            }, 500);
+        }
+
+        function highlightCommand(idx) {
+            document.querySelectorAll('.program-cmd').forEach((el, i) => {
+                el.classList.toggle('running', i === idx);
+            });
+        }
+
+        function shakeMonkeyCell() {
+            const cell = document.querySelector(`.cell[data-col="${monkeyState.col}"][data-row="${monkeyState.row}"]`);
+            if (cell) {
+                cell.classList.add('error-cell');
+                setTimeout(() => cell.classList.remove('error-cell'), 500);
+            }
+        }
+
+        // === LEVEL COMPLETE ===
+        function onLevelComplete() {
+            playWinSound();
+            launchConfetti();
+
+            const commandsUsed = program.length;
+            const optimal = levels[currentLevel].optimal;
+            let stars;
+
+            if (commandsUsed <= optimal) {
+                stars = 3;
+            } else if (commandsUsed <= optimal + 2) {
+                stars = 2;
+            } else {
+                stars = 1;
+            }
+
+            // Update stars
+            const prevStars = levelStarsArr[currentLevel];
+            if (stars > prevStars) {
+                totalStarsCount += (stars - prevStars);
+                levelStarsArr[currentLevel] = stars;
+                updateStarsDisplay();
+            }
+
+            // Show modal
+            const starsStr = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+            const isLastLevel = currentLevel >= levels.length - 1;
+
+            let msg = '';
+            if (stars === 3) msg = `${commandsUsed} פקודות - מושלם! 🏆`;
+            else if (stars === 2) msg = `${commandsUsed} פקודות - יופי! נסי עם פחות פקודות לעוד כוכב`;
+            else msg = `${commandsUsed} פקודות - הצלחת! נסי עם פחות פקודות`;
+
+            document.getElementById('modalEmoji').textContent = stars === 3 ? '🏆' : '🎉';
+            document.getElementById('modalTitle').textContent = stars === 3 ? '!מושלם' : '!כל הכבוד';
+            document.getElementById('modalStars').textContent = starsStr;
+            document.getElementById('modalMsg').textContent = msg;
+
+            const btn = document.getElementById('modalBtn');
+            if (isLastLevel) {
+                btn.textContent = '🎊 סיימתי הכל';
+                btn.onclick = showAllDone;
+            } else {
+                btn.textContent = '➡️ שלב הבא';
+                btn.onclick = nextLevel;
+            }
+
+            document.getElementById('overlay').classList.add('show');
+        }
+
+        function nextLevel() {
+            document.getElementById('overlay').classList.remove('show');
+            if (currentLevel < levels.length - 1) {
+                loadLevel(currentLevel + 1);
+            }
+        }
+
+        function showAllDone() {
+            document.getElementById('overlay').classList.remove('show');
+            setTimeout(() => {
+                document.getElementById('modalEmoji').innerHTML = '<div class="all-done-emoji">🐵🍌🎉</div>';
+                document.getElementById('modalTitle').textContent = '!סיימת את כל השלבים';
+                document.getElementById('modalStars').textContent = `⭐ ${totalStarsCount} כוכבים`;
+                document.getElementById('modalMsg').textContent = '!את כוכבת תכנות אמיתית';
+                document.getElementById('modalBtn').textContent = '🔄 שחקי שוב מההתחלה';
+                document.getElementById('modalBtn').onclick = () => {
+                    document.getElementById('overlay').classList.remove('show');
+                    totalStarsCount = 0;
+                    levelStarsArr.fill(0);
+                    loadLevel(0);
+                };
+                document.getElementById('overlay').classList.add('show');
+                launchConfetti();
+                launchConfetti();
+            }, 300);
+        }
+
+        // === CONFETTI ===
+        function launchConfetti() {
+            const celebration = document.getElementById('celebration');
+            const colors = ['#e74c3c', '#e91e63', '#9b59b6', '#3498db', '#2ecc71', '#f1c40f', '#e67e22', '#1abc9c'];
+
+            for (let i = 0; i < 60; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'confetti';
+                conf.style.left = Math.random() * 100 + '%';
+                conf.style.top = '-10px';
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.width = (6 + Math.random() * 10) + 'px';
+                conf.style.height = (6 + Math.random() * 10) + 'px';
+                conf.style.animationDelay = Math.random() * 0.6 + 's';
+                celebration.appendChild(conf);
+                setTimeout(() => conf.remove(), 2600);
+            }
+        }
+
+        // === INIT ===
+        loadLevel(0);
+    </script>
+</body>
+</html>

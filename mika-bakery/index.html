@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧁 המאפיה של מיקה 🧁</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Heebo', system-ui, sans-serif;
+    background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 50%, #fd79a8 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: #5c3a1e;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Floating background decorations */
+  .bg-deco {
+    position: fixed;
+    pointer-events: none;
+    font-size: 2rem;
+    opacity: 0.35;
+    animation: float 8s ease-in-out infinite;
+    z-index: 0;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    50% { transform: translateY(-20px) rotate(15deg); }
+  }
+
+  /* App container */
+  #app {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 12px;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border-radius: 24px;
+    padding: 12px 20px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .shop-name {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #d63384;
+  }
+  .stats { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .stat {
+    background: #fff5e6;
+    border: 3px solid #f4c98a;
+    border-radius: 16px;
+    padding: 6px 14px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .stat.coin-stat { background: #fff8d0; border-color: #f0c419; }
+  .stat.streak-stat { background: #ffe0e0; border-color: #ff6b6b; }
+  .stat .icon { font-size: 1.4rem; }
+  .icon-btn {
+    background: white;
+    border: 3px solid #ddd;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.2s;
+  }
+  .icon-btn:hover { transform: scale(1.1); }
+  .icon-btn:active { transform: scale(0.95); }
+
+  /* Screens */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .screen {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    background: white;
+    border-radius: 28px;
+    padding: 24px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+    position: relative;
+    overflow: hidden;
+  }
+  .screen.active { display: flex; }
+
+  /* Start screen */
+  #startScreen {
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #fff 0%, #fff5e6 100%);
+  }
+  #startScreen .hero-emoji {
+    font-size: 5rem;
+    animation: bounce-in 0.8s ease-out;
+  }
+  #startScreen h1 {
+    font-size: 2.4rem;
+    color: #d63384;
+    margin: 16px 0;
+    font-weight: 900;
+  }
+  #startScreen p {
+    font-size: 1.3rem;
+    margin-bottom: 24px;
+    color: #6c4a2c;
+  }
+  @keyframes bounce-in {
+    0% { transform: scale(0); }
+    60% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  /* Big buttons */
+  .big-btn {
+    background: linear-gradient(135deg, #ff6b9d, #c44569);
+    color: white;
+    border: none;
+    padding: 18px 36px;
+    font-size: 1.6rem;
+    font-weight: 700;
+    border-radius: 50px;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 6px 0 #a03350, 0 8px 16px rgba(0,0,0,0.15);
+    transition: transform 0.1s, box-shadow 0.1s;
+    margin: 6px;
+  }
+  .big-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #a03350, 0 12px 18px rgba(0,0,0,0.2); }
+  .big-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #a03350, 0 4px 8px rgba(0,0,0,0.15); }
+  .big-btn.secondary {
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    box-shadow: 0 6px 0 #064c8a, 0 8px 16px rgba(0,0,0,0.15);
+  }
+  .big-btn.secondary:hover { box-shadow: 0 8px 0 #064c8a, 0 12px 18px rgba(0,0,0,0.2); }
+  .big-btn.secondary:active { box-shadow: 0 2px 0 #064c8a, 0 4px 8px rgba(0,0,0,0.15); }
+
+  /* Level switcher */
+  .level-switcher {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .level-pill {
+    background: white;
+    border: 3px solid #f1c2d8;
+    color: #999;
+    padding: 6px 14px;
+    border-radius: 18px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.12s, background 0.2s, border-color 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .level-pill:hover { transform: translateY(-2px); }
+  .level-pill:active { transform: translateY(1px); }
+  .level-pill.active {
+    background: linear-gradient(135deg, #ff6b9d, #c44569);
+    border-color: #c44569;
+    color: white;
+    box-shadow: 0 4px 10px rgba(196,69,105,0.35);
+  }
+  .level-pill .pill-num {
+    background: rgba(255,255,255,0.6);
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    color: #c44569;
+  }
+  .level-pill.active .pill-num {
+    background: white;
+    color: #c44569;
+  }
+
+  .customer-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+    margin-top: 10px;
+  }
+  .customer {
+    font-size: 5rem;
+    line-height: 1;
+    animation: customer-in 0.5s ease-out;
+    flex-shrink: 0;
+  }
+  .customer.clickable {
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .customer.clickable:hover { transform: scale(1.08); }
+  .customer.clickable:active { transform: scale(0.95); }
+  .customer.speaking { animation: speaking-bob 0.4s ease-in-out infinite; }
+  @keyframes speaking-bob {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-4px) scale(1.05); }
+  }
+  .speak-again-btn {
+    background: #fff;
+    border: 2px solid #f0c419;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 4px;
+    transition: transform 0.15s, background 0.2s;
+    vertical-align: middle;
+  }
+  .speak-again-btn:hover { background: #fff8d0; transform: rotate(-20deg) scale(1.15); }
+  .speak-again-btn:active { transform: rotate(-40deg) scale(0.9); }
+  .speech-line { font-size: 1.05rem; line-height: 1.5; }
+  @keyframes customer-in {
+    0% { transform: translateX(80px) scale(0.5); opacity: 0; }
+    100% { transform: translateX(0) scale(1); opacity: 1; }
+  }
+  .speech-bubble {
+    flex: 1;
+    background: #fff8d0;
+    border: 4px solid #f0c419;
+    border-radius: 22px;
+    padding: 14px 18px;
+    position: relative;
+    font-size: 1.15rem;
+  }
+  .speech-bubble::before {
+    content: '';
+    position: absolute;
+    right: -16px;
+    top: 22px;
+    width: 0; height: 0;
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+    border-left: 16px solid #f0c419;
+  }
+  .speech-bubble::after {
+    content: '';
+    position: absolute;
+    right: -10px;
+    top: 24px;
+    width: 0; height: 0;
+    border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent;
+    border-left: 12px solid #fff8d0;
+  }
+  .speech-bubble .customer-name { font-weight: 900; color: #d63384; }
+  .speech-bubble .order-line { margin-top: 6px; font-size: 1.05rem; }
+  .speech-bubble .problem {
+    font-size: 2.4rem;
+    font-weight: 900;
+    text-align: center;
+    margin-top: 8px;
+    color: #5c3a1e;
+    letter-spacing: 2px;
+    direction: ltr; /* keep math equation reading L→R: "12 + 23 = ?" */
+    unicode-bidi: isolate;
+  }
+
+  /* Cookies visualization */
+  .cookies-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 14px 0 20px;
+  }
+  .number-block {
+    background: #fff5e6;
+    border: 3px dashed #d4a574;
+    border-radius: 18px;
+    padding: 12px;
+    min-width: 200px;
+    text-align: center;
+  }
+  .number-label {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #d63384;
+    margin-bottom: 8px;
+  }
+  .trays-row, .singles-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .tray {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+    background: linear-gradient(145deg, #a0703a, #8b5a2b);
+    border: 3px solid #5c3a1e;
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.2);
+  }
+  .pastry-item {
+    font-size: 20px;
+    line-height: 1;
+    text-align: center;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .single-item {
+    font-size: 32px;
+    width: auto;
+    height: auto;
+    padding: 2px;
+  }
+
+  .plus-sign {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #d63384;
+  }
+
+  /* Hint box */
+  .hint-box {
+    background: #e3fcef;
+    border: 3px solid #38d9a9;
+    border-radius: 16px;
+    padding: 12px 18px;
+    margin: 10px 0;
+    font-size: 1.1rem;
+    text-align: center;
+    color: #0b6b4b;
+    font-weight: 700;
+    animation: hint-in 0.3s ease-out;
+  }
+  .hint-box.hidden { display: none; }
+  @keyframes hint-in {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Answer buttons */
+  .answers {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    margin-top: auto;
+    flex-wrap: wrap;
+  }
+  .answer-btn {
+    flex: 1;
+    min-width: 110px;
+    max-width: 200px;
+    background: white;
+    border: 4px solid #74b9ff;
+    color: #0984e3;
+    padding: 22px 12px;
+    font-size: 2.4rem;
+    font-weight: 900;
+    border-radius: 22px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.15s, background 0.2s, border-color 0.2s;
+    box-shadow: 0 5px 0 #74b9ff, 0 8px 14px rgba(0,0,0,0.1);
+  }
+  .answer-btn:hover { transform: translateY(-2px); }
+  .answer-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #74b9ff; }
+  .answer-btn.correct {
+    background: #d4edda;
+    border-color: #38d9a9;
+    color: #0b6b4b;
+    animation: correct-pulse 0.6s ease-out;
+  }
+  .answer-btn.wrong {
+    background: #ffe0e0;
+    border-color: #ff6b6b;
+    color: #c44545;
+    animation: shake 0.4s;
+  }
+  .answer-btn.disabled { pointer-events: none; opacity: 0.6; }
+  @keyframes correct-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  /* Flying coin */
+  .flying-coin {
+    position: fixed;
+    font-size: 2.5rem;
+    z-index: 100;
+    pointer-events: none;
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Confetti */
+  .confetti {
+    position: fixed;
+    width: 10px;
+    height: 14px;
+    z-index: 99;
+    pointer-events: none;
+    animation: confetti-fall 2.5s linear forwards;
+  }
+  @keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(0); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #ff6b9d, #c44569);
+    color: white;
+    padding: 14px 30px;
+    border-radius: 30px;
+    font-size: 1.4rem;
+    font-weight: 900;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    z-index: 200;
+    animation: toast-in 0.4s ease-out, toast-out 0.4s ease-in 1.8s forwards;
+  }
+  @keyframes toast-in {
+    from { transform: translate(-50%, -80px); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
+  }
+  @keyframes toast-out {
+    from { transform: translate(-50%, 0); opacity: 1; }
+    to { transform: translate(-50%, -80px); opacity: 0; }
+  }
+
+  /* Shop screen */
+  #shopScreen h2 {
+    color: #d63384;
+    margin-bottom: 12px;
+    text-align: center;
+    font-size: 1.8rem;
+  }
+  .shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 14px;
+    margin: 14px 0;
+  }
+  .shop-item {
+    background: #fff8d0;
+    border: 3px solid #f0c419;
+    border-radius: 18px;
+    padding: 14px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .shop-item:hover { transform: translateY(-3px); }
+  .shop-item.owned {
+    background: #d4edda;
+    border-color: #38d9a9;
+    cursor: default;
+  }
+  .shop-item.cant-afford {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .shop-item .shop-emoji { font-size: 3rem; display: block; }
+  .shop-item .shop-name-label { font-weight: 700; margin: 4px 0; }
+  .shop-item .price { font-weight: 900; color: #d63384; }
+  .shop-item .owned-label { font-weight: 900; color: #0b6b4b; }
+
+  /* Draggable decoration layer */
+  #decorationsLayer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 30;
+  }
+  .decoration {
+    position: absolute;
+    font-size: 4.5rem;
+    line-height: 1;
+    cursor: grab;
+    pointer-events: auto;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    touch-action: none;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
+    transition: transform 0.15s, filter 0.15s;
+    animation: deco-pop-in 0.4s ease-out;
+  }
+  .decoration:hover { transform: scale(1.1); }
+  .decoration.dragging {
+    cursor: grabbing;
+    transform: scale(1.25) rotate(-3deg);
+    filter: drop-shadow(0 10px 16px rgba(0,0,0,0.35));
+    z-index: 100;
+    animation: none;
+  }
+  @keyframes deco-pop-in {
+    0% { transform: scale(0) rotate(-30deg); }
+    60% { transform: scale(1.3) rotate(10deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  /* Trash zone (shown during drag) */
+  #trashZone {
+    position: fixed;
+    bottom: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #ff6b6b, #c44545);
+    color: white;
+    padding: 18px 32px;
+    border-radius: 50px 50px 0 0;
+    font-size: 2.5rem;
+    font-weight: 900;
+    box-shadow: 0 -6px 20px rgba(0,0,0,0.25);
+    z-index: 40;
+    transition: bottom 0.3s ease-out, background 0.2s;
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #trashZone.active { bottom: 0; }
+  #trashZone.hovering {
+    background: linear-gradient(135deg, #c44545, #8b1e1e);
+    transform: translateX(-50%) scale(1.1);
+  }
+  #trashZone .trash-label { font-size: 1rem; font-weight: 700; }
+
+  /* Level complete */
+  .celebration {
+    text-align: center;
+    padding: 30px;
+  }
+  .celebration .emoji-row {
+    font-size: 4rem;
+    margin: 12px 0;
+    animation: bounce-in 0.6s ease-out;
+  }
+  .celebration h2 {
+    color: #d63384;
+    font-size: 2rem;
+    margin: 10px 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .shop-name { font-size: 1.2rem; }
+    .stat { font-size: 0.95rem; padding: 5px 10px; }
+    #startScreen h1 { font-size: 1.8rem; }
+    .speech-bubble .problem { font-size: 2rem; }
+    .answer-btn { font-size: 2rem; padding: 18px 8px; }
+    .customer { font-size: 4rem; }
+    .number-block { min-width: 140px; padding: 8px; }
+    .pastry-item { font-size: 16px; width: 18px; height: 18px; }
+    .single-item { font-size: 24px; }
+    .decoration { font-size: 3.5rem; }
+    .screen { padding: 14px; border-radius: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Floating background decorations -->
+<div class="bg-deco" style="top: 10%; left: 5%;">🧁</div>
+<div class="bg-deco" style="top: 30%; right: 8%; animation-delay: -2s;">🍩</div>
+<div class="bg-deco" style="top: 60%; left: 10%; animation-delay: -4s;">🍪</div>
+<div class="bg-deco" style="top: 80%; right: 12%; animation-delay: -6s;">🎂</div>
+<div class="bg-deco" style="top: 50%; right: 30%; animation-delay: -3s;">🧁</div>
+<div class="bg-deco" style="top: 20%; left: 35%; animation-delay: -5s;">🍰</div>
+
+<div id="app">
+  <header>
+    <div class="shop-name">🧁 המאפיה של מיקה</div>
+    <div class="stats">
+      <div class="stat coin-stat"><span class="icon">🪙</span><span id="coinsDisplay">0</span></div>
+      <div class="stat streak-stat" id="streakStatWrapper" style="display:none;"><span class="icon">🔥</span><span id="streakDisplay">0</span></div>
+      <button class="icon-btn" id="soundBtn" title="סאונד">🔊</button>
+      <button class="icon-btn" id="shopBtn" title="חנות">🛍️</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- START SCREEN -->
+    <div id="startScreen" class="screen active">
+      <div class="hero-emoji">🧁🍪🎂</div>
+      <h1>ברוכים הבאים<br>למאפיה של מיקה!</h1>
+      <p>הלקוחות רעבים ומחכים<br>להזמנות שלך 🐰🐻🦊</p>
+      <button class="big-btn" onclick="startGame()">בואי נתחיל! ✨</button>
+      <button class="big-btn secondary" onclick="openShop()" style="font-size: 1.1rem; padding: 12px 24px;">🛍️ חנות הקישוטים</button>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="gameScreen" class="screen">
+      <div class="level-switcher" id="levelSwitcher">
+        <button class="level-pill" data-level="1"><span class="pill-num">1</span> חימום</button>
+        <button class="level-pill" data-level="2"><span class="pill-num">2</span> עשרות</button>
+        <button class="level-pill" data-level="3"><span class="pill-num">3</span> גדולים</button>
+      </div>
+
+      <div class="customer-row">
+        <div class="customer clickable" id="customerEmoji" title="לחצי לשמוע שוב">🐰</div>
+        <div class="speech-bubble">
+          <div class="speech-line"><span class="customer-name" id="customerName">ארנבי</span>: <span id="spokenLine">"אני רוצה 3 ועוד 4 🍪 עוגיות"</span> <button class="speak-again-btn" id="speakAgainBtn" title="שוב">🔁</button></div>
+          <div class="problem" id="problemText">3 + 4 = ?</div>
+        </div>
+      </div>
+
+      <div class="cookies-area" id="cookiesArea"></div>
+
+      <div class="hint-box hidden" id="hintBox"></div>
+
+      <div class="answers" id="answers"></div>
+    </div>
+
+    <!-- SHOP SCREEN -->
+    <div id="shopScreen" class="screen">
+      <h2>🛍️ חנות הקישוטים</h2>
+      <p style="text-align:center; color:#6c4a2c;">תשתמשי במטבעות כדי לקשט את המאפיה!</p>
+      <div class="shop-grid" id="shopGrid"></div>
+      <button class="big-btn secondary" onclick="backFromShop()">חזרה ⬅️</button>
+    </div>
+
+    <!-- LEVEL UP SCREEN -->
+    <div id="levelUpScreen" class="screen">
+      <div class="celebration">
+        <div class="emoji-row" id="levelUpEmojis">🎉🌟🎉</div>
+        <h2 id="levelUpTitle">כל הכבוד!</h2>
+        <p id="levelUpText" style="font-size: 1.2rem; margin: 14px 0;"></p>
+        <button class="big-btn" onclick="continueGame()">המשך ➡️</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Draggable decorations layer (above everything, but transparent to clicks) -->
+<div id="decorationsLayer"></div>
+
+<!-- Trash zone (appears during drag) -->
+<div id="trashZone">
+  <span>🗑️</span>
+  <span class="trash-label">לזרוק לפח</span>
+</div>
+
+<script>
+  // ============ STATE ============
+  const STORAGE_KEY = 'mika-bakery-save-v1';
+  // decorations: array of {id, uid, x, y} where x,y are fractions of viewport (0..1)
+  const state = {
+    coins: 0,
+    decorations: [],
+    decoUidCounter: 1,
+    bestStreak: 0,
+    totalCorrect: 0,
+    soundOn: true,
+    // session
+    level: 1,
+    questionInLevel: 0,
+    streak: 0,
+    currentProblem: null,
+    attempts: 0,
+    lastProblemKey: null,
+  };
+
+  // ============ CONSTANTS ============
+  const PASTRIES = [
+    { id: 'cookie',    emoji: '🍪', namePlural: 'עוגיות' },
+    { id: 'cupcake',   emoji: '🧁', namePlural: 'קאפקייקס' },
+    { id: 'donut',     emoji: '🍩', namePlural: 'דונאטס' },
+    { id: 'croissant', emoji: '🥐', namePlural: 'קרואסונים' },
+    { id: 'cake',      emoji: '🍰', namePlural: 'עוגות' },
+    { id: 'pretzel',   emoji: '🥨', namePlural: 'בייגלה' },
+  ];
+
+  // Each customer has a unique voice: pitch (0..2, default 1) and rate (0.1..10, default 1)
+  const CUSTOMERS = [
+    {emoji: '🐰', name: 'ארנבי',    pitch: 1.8, rate: 1.15},
+    {emoji: '🐻', name: 'דובי',     pitch: 0.5, rate: 0.85},
+    {emoji: '🦊', name: 'שועלי',    pitch: 1.3, rate: 1.1},
+    {emoji: '🐱', name: 'חתולי',    pitch: 1.6, rate: 1.0},
+    {emoji: '🐶', name: 'כלבלב',    pitch: 1.2, rate: 1.15},
+    {emoji: '🦁', name: 'אריה',     pitch: 0.4, rate: 0.85},
+    {emoji: '🐼', name: 'פנדה',     pitch: 0.7, rate: 0.9},
+    {emoji: '🐨', name: 'קואלי',    pitch: 1.0, rate: 0.95},
+    {emoji: '🐸', name: 'צפרדע',    pitch: 0.6, rate: 1.05},
+    {emoji: '🦄', name: 'חד-קרן',   pitch: 1.9, rate: 1.05},
+    {emoji: '🐲', name: 'דרקון',    pitch: 0.3, rate: 0.8},
+    {emoji: '🦉', name: 'ינשוף',    pitch: 1.0, rate: 0.9},
+    {emoji: '🐧', name: 'פינגווין', pitch: 1.4, rate: 1.0},
+    {emoji: '🦒', name: 'ג׳ירף',   pitch: 1.5, rate: 0.95},
+    {emoji: '🐮', name: 'פרה',      pitch: 0.6, rate: 0.85},
+    {emoji: '🐷', name: 'חזרזיר',   pitch: 1.7, rate: 1.1},
+  ];
+
+  const SHOP_ITEMS = [
+    {id: 'flower', emoji: '🌸', name: 'פרח', price: 5},
+    {id: 'balloon', emoji: '🎈', name: 'בלון', price: 8},
+    {id: 'star', emoji: '⭐', name: 'כוכב', price: 10},
+    {id: 'teddy', emoji: '🧸', name: 'דובי', price: 15},
+    {id: 'cake', emoji: '🎂', name: 'עוגה', price: 20},
+    {id: 'crown', emoji: '👑', name: 'כתר', price: 25},
+    {id: 'rainbow', emoji: '🌈', name: 'קשת', price: 35},
+    {id: 'unicorn', emoji: '🦄', name: 'חד-קרן', price: 50},
+  ];
+
+  const LEVELS = [
+    { id: 1, name: 'חימום', questions: 3, generate: genWarmup },
+    { id: 2, name: 'עשרות', questions: 4, generate: genTens },
+    { id: 3, name: 'גדולים', questions: 8, generate: genFull },
+  ];
+
+  // ============ STORAGE ============
+  function loadSave() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const data = JSON.parse(raw);
+        state.coins = data.coins || 0;
+        state.bestStreak = data.bestStreak || 0;
+        state.totalCorrect = data.totalCorrect || 0;
+        state.soundOn = data.soundOn !== false;
+        state.decoUidCounter = data.decoUidCounter || 1;
+
+        const decos = data.decorations || [];
+        // Migrate old format (array of id strings) to new format (array of instances)
+        if (decos.length > 0 && typeof decos[0] === 'string') {
+          state.decorations = decos.map((id, i) => ({
+            id,
+            uid: state.decoUidCounter++,
+            x: 0.1 + (i % 5) * 0.15,
+            y: 0.12 + Math.floor(i / 5) * 0.15,
+          }));
+        } else {
+          state.decorations = decos;
+          // make sure counter is past max uid
+          decos.forEach(d => {
+            if (d.uid >= state.decoUidCounter) state.decoUidCounter = d.uid + 1;
+          });
+        }
+      }
+    } catch (e) { /* ignore */ }
+  }
+  function saveSave() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        coins: state.coins,
+        decorations: state.decorations,
+        decoUidCounter: state.decoUidCounter,
+        bestStreak: state.bestStreak,
+        totalCorrect: state.totalCorrect,
+        soundOn: state.soundOn,
+      }));
+    } catch (e) { /* ignore */ }
+  }
+
+  // ============ PROBLEM GENERATORS ============
+  function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function genWarmup() {
+    const a = randInt(1, 5);
+    const b = randInt(1, 9 - a);
+    return { a, b };
+  }
+
+  function genTens() {
+    const tA = randInt(1, 4);
+    const tB = randInt(1, 9 - tA);
+    return { a: tA * 10, b: tB * 10 };
+  }
+
+  function genFull() {
+    const tA = randInt(1, 8);
+    const tB = randInt(1, 9 - tA);
+    const oA = randInt(0, 8);
+    const oB = randInt(0, 9 - oA);
+    let a = tA * 10 + oA;
+    let b = tB * 10 + oB;
+    // ensure at least one has ones, to make it more interesting
+    if (oA === 0 && oB === 0) {
+      // re-roll ones
+      const o = randInt(1, 9);
+      const split = randInt(0, o);
+      a = tA * 10 + split;
+      b = tB * 10 + (o - split);
+    }
+    return { a, b };
+  }
+
+  function generateProblem() {
+    const lvl = LEVELS[state.level - 1];
+    let attempts = 0;
+    let p;
+    do {
+      p = lvl.generate();
+      const key = `${p.a}+${p.b}`;
+      if (key !== state.lastProblemKey || attempts > 10) {
+        state.lastProblemKey = key;
+        break;
+      }
+      attempts++;
+    } while (attempts < 10);
+    p.answer = p.a + p.b;
+    p.pastry = PASTRIES[Math.floor(Math.random() * PASTRIES.length)];
+    return p;
+  }
+
+  function genOptions(correct) {
+    const opts = new Set([correct]);
+    // tempting wrong answers
+    const candidates = [];
+    // wrong by swapping tens/ones logic
+    const tens = Math.floor(correct / 10);
+    const ones = correct % 10;
+    if (tens >= 1 && ones >= 1 && ones * 10 + tens !== correct) {
+      candidates.push(ones * 10 + tens);
+    }
+    candidates.push(correct + 10);
+    candidates.push(correct - 10);
+    candidates.push(correct + 1);
+    candidates.push(correct - 1);
+    candidates.push(correct + 2);
+
+    candidates.sort(() => Math.random() - 0.5);
+    for (const c of candidates) {
+      if (c > 0 && c < 100 && !opts.has(c)) opts.add(c);
+      if (opts.size >= 3) break;
+    }
+    while (opts.size < 3) {
+      const r = randInt(1, 99);
+      opts.add(r);
+    }
+    const arr = Array.from(opts);
+    // shuffle
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  // ============ RENDER ============
+  function renderNumberBlock(n, pastry) {
+    const tens = Math.floor(n / 10);
+    const ones = n % 10;
+    const e = pastry.emoji;
+    let html = `<div class="number-block"><div class="number-label">${n}</div>`;
+
+    if (tens > 0) {
+      html += `<div class="trays-row">`;
+      for (let i = 0; i < tens; i++) {
+        html += `<div class="tray">`;
+        for (let j = 0; j < 10; j++) html += `<div class="pastry-item">${e}</div>`;
+        html += `</div>`;
+      }
+      html += `</div>`;
+    }
+
+    if (ones > 0) {
+      html += `<div class="singles-row">`;
+      for (let i = 0; i < ones; i++) {
+        html += `<div class="pastry-item single-item">${e}</div>`;
+      }
+      html += `</div>`;
+    }
+
+    if (tens === 0 && ones === 0) {
+      html += `<div style="opacity:0.5;">אין ${pastry.namePlural}</div>`;
+    }
+
+    html += `</div>`;
+    return html;
+  }
+
+  function renderQuestion() {
+    const p = state.currentProblem;
+    const customer = CUSTOMERS[Math.floor(Math.random() * CUSTOMERS.length)];
+    state.lastCustomer = customer;
+    document.getElementById('customerEmoji').textContent = customer.emoji;
+    document.getElementById('customerName').textContent = customer.name;
+    document.getElementById('spokenLine').innerHTML = `"אני רוצה <strong>${p.a}</strong> ועוד <strong>${p.b}</strong> ${p.pastry.emoji} ${p.pastry.namePlural}"`;
+    document.getElementById('problemText').textContent = `${p.a} + ${p.b} = ?`;
+    updateLevelPills();
+
+    const area = document.getElementById('cookiesArea');
+    area.innerHTML = `
+      ${renderNumberBlock(p.a, p.pastry)}
+      <div class="plus-sign">+</div>
+      ${renderNumberBlock(p.b, p.pastry)}
+    `;
+
+    // Reset customer animation
+    const cust = document.querySelector('.customer');
+    cust.style.animation = 'none';
+    void cust.offsetWidth;
+    cust.style.animation = '';
+
+    renderAnswers();
+    hideHint();
+    speakOrder(customer, p.a, p.b, p.pastry);
+  }
+
+  function renderAnswers() {
+    const opts = genOptions(state.currentProblem.answer);
+    const ans = document.getElementById('answers');
+    ans.innerHTML = '';
+    opts.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'answer-btn';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => handleAnswer(opt, btn));
+      ans.appendChild(btn);
+    });
+  }
+
+  // ============ DECORATIONS LAYER (DRAGGABLE) ============
+  function renderDecorationsLayer() {
+    const layer = document.getElementById('decorationsLayer');
+    layer.innerHTML = '';
+    state.decorations.forEach(inst => {
+      const el = createDecorationEl(inst);
+      layer.appendChild(el);
+    });
+  }
+
+  function createDecorationEl(inst) {
+    const item = SHOP_ITEMS.find(s => s.id === inst.id);
+    if (!item) return document.createElement('span');
+    const el = document.createElement('div');
+    el.className = 'decoration';
+    el.dataset.uid = inst.uid;
+    el.textContent = item.emoji;
+    positionDecoration(el, inst);
+    attachDragHandlers(el, inst);
+    return el;
+  }
+
+  function positionDecoration(el, inst) {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    // x,y are fractions in [0..1] of viewport. Treat them as top-left of the element.
+    const x = Math.max(0, Math.min(0.98, inst.x)) * vw;
+    const y = Math.max(0, Math.min(0.95, inst.y)) * vh;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+  }
+
+  function attachDragHandlers(el, inst) {
+    let startPointerX, startPointerY, startElX, startElY, dragging = false;
+
+    function onStart(e) {
+      const pt = pointerCoords(e);
+      const rect = el.getBoundingClientRect();
+      startPointerX = pt.x;
+      startPointerY = pt.y;
+      startElX = rect.left;
+      startElY = rect.top;
+      dragging = true;
+      el.classList.add('dragging');
+      showTrashZone(true);
+      e.preventDefault();
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onEnd);
+      document.addEventListener('touchmove', onMove, { passive: false });
+      document.addEventListener('touchend', onEnd);
+      document.addEventListener('touchcancel', onEnd);
+    }
+
+    function onMove(e) {
+      if (!dragging) return;
+      const pt = pointerCoords(e);
+      const dx = pt.x - startPointerX;
+      const dy = pt.y - startPointerY;
+      const newX = startElX + dx;
+      const newY = startElY + dy;
+      el.style.left = newX + 'px';
+      el.style.top = newY + 'px';
+      updateTrashHover(pt);
+      e.preventDefault();
+    }
+
+    function onEnd(e) {
+      if (!dragging) return;
+      dragging = false;
+      el.classList.remove('dragging');
+
+      const pt = lastPointerCoords(e);
+      const overTrash = isOverTrash(pt);
+      showTrashZone(false);
+
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onEnd);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onEnd);
+      document.removeEventListener('touchcancel', onEnd);
+
+      if (overTrash) {
+        // delete this instance
+        state.decorations = state.decorations.filter(d => d.uid !== inst.uid);
+        el.remove();
+        playWrong();
+        saveSave();
+      } else {
+        // save new position as fraction of viewport
+        const rect = el.getBoundingClientRect();
+        inst.x = rect.left / window.innerWidth;
+        inst.y = rect.top / window.innerHeight;
+        saveSave();
+      }
+    }
+
+    el.addEventListener('mousedown', onStart);
+    el.addEventListener('touchstart', onStart, { passive: false });
+  }
+
+  function pointerCoords(e) {
+    if (e.touches && e.touches[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+  function lastPointerCoords(e) {
+    if (e.changedTouches && e.changedTouches[0]) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+    if (e.touches && e.touches[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+
+  function showTrashZone(show) {
+    const tz = document.getElementById('trashZone');
+    tz.classList.toggle('active', show);
+    if (!show) tz.classList.remove('hovering');
+  }
+  function isOverTrash(pt) {
+    const tz = document.getElementById('trashZone');
+    if (!tz.classList.contains('active')) return false;
+    const r = tz.getBoundingClientRect();
+    return pt.x >= r.left && pt.x <= r.right && pt.y >= r.top && pt.y <= r.bottom;
+  }
+  function updateTrashHover(pt) {
+    const tz = document.getElementById('trashZone');
+    tz.classList.toggle('hovering', isOverTrash(pt));
+  }
+
+  // Reposition decorations on viewport resize
+  window.addEventListener('resize', () => {
+    document.querySelectorAll('.decoration').forEach(el => {
+      const uid = parseInt(el.dataset.uid, 10);
+      const inst = state.decorations.find(d => d.uid === uid);
+      if (inst) positionDecoration(el, inst);
+    });
+  });
+
+  function updateStats() {
+    document.getElementById('coinsDisplay').textContent = state.coins;
+    const streakWrap = document.getElementById('streakStatWrapper');
+    if (state.streak > 0) {
+      streakWrap.style.display = 'flex';
+      document.getElementById('streakDisplay').textContent = state.streak;
+    } else {
+      streakWrap.style.display = 'none';
+    }
+  }
+
+  // ============ ANSWER HANDLING ============
+  let answerLocked = false;
+
+  function handleAnswer(choice, btn) {
+    if (answerLocked) return;
+    const correct = state.currentProblem.answer;
+
+    if (choice === correct) {
+      answerLocked = true;
+      btn.classList.add('correct');
+      onCorrect(btn);
+    } else {
+      btn.classList.add('wrong', 'disabled');
+      state.attempts++;
+      playWrong();
+      showHint();
+    }
+  }
+
+  function onCorrect(btn) {
+    // Coins: 1 base + streak bonus
+    let earned = 1;
+    state.streak++;
+    state.totalCorrect++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+    if (state.streak === 3) earned = 3;
+    if (state.streak === 5) {
+      earned = 6;
+      showToast('5 ברצף! 🔥 בונוס!');
+    } else if (state.streak === 10) {
+      earned = 10;
+      showToast('10 ברצף! ⭐ את כוכבת!');
+    }
+    state.coins += earned;
+    saveSave();
+
+    playCorrect();
+    flyCoin(btn, earned);
+    updateStats();
+
+    state.questionInLevel++;
+    state.attempts = 0;
+
+    // After short delay, next question or level up
+    setTimeout(() => {
+      answerLocked = false;
+      const lvl = LEVELS[state.level - 1];
+      if (state.questionInLevel >= lvl.questions && state.level < LEVELS.length) {
+        showLevelUp();
+      } else {
+        nextQuestion();
+      }
+    }, 1000);
+  }
+
+  function nextQuestion() {
+    state.currentProblem = generateProblem();
+    renderQuestion();
+  }
+
+  function updateLevelPills() {
+    document.querySelectorAll('.level-pill').forEach(btn => {
+      const lvl = parseInt(btn.dataset.level, 10);
+      btn.classList.toggle('active', lvl === state.level);
+    });
+  }
+
+  function switchLevel(lvl) {
+    if (lvl < 1 || lvl > LEVELS.length) return;
+    if (lvl === state.level) return;
+    state.level = lvl;
+    state.questionInLevel = 0;
+    state.attempts = 0;
+    answerLocked = false;
+    if (window.speechSynthesis) speechSynthesis.cancel();
+    nextQuestion();
+  }
+
+  function showHint() {
+    const p = state.currentProblem;
+    const tA = Math.floor(p.a / 10), oA = p.a % 10;
+    const tB = Math.floor(p.b / 10), oB = p.b % 10;
+    const tensSum = tA + tB;
+    const onesSum = oA + oB;
+
+    const box = document.getElementById('hintBox');
+    box.classList.remove('hidden');
+
+    if (state.attempts === 1) {
+      if (tensSum > 0 && onesSum > 0) {
+        box.innerHTML = `💡 בואי נספור קודם את המגשים השלמים:<br><strong>${tA} + ${tB} = ${tensSum} מגשים</strong> (${tensSum * 10} עוגיות)`;
+      } else if (tensSum > 0) {
+        box.innerHTML = `💡 יש לנו רק מגשים שלמים. <strong>${tA} + ${tB} = ${tensSum}</strong> מגשים = ${tensSum * 10} עוגיות`;
+      } else {
+        box.innerHTML = `💡 בואי נספור את העוגיות אחת אחת... 🍪`;
+      }
+    } else {
+      // After 2+ attempts: spell it out
+      if (tensSum > 0 && onesSum > 0) {
+        box.innerHTML = `💡 <strong>${tensSum * 10} + ${onesSum} = ${p.answer}</strong> 🍪<br><small>(${tensSum} מגשים = ${tensSum * 10}, ועוד ${onesSum} בודדות)</small>`;
+      } else {
+        box.innerHTML = `💡 התשובה היא <strong>${p.answer}</strong> 🍪`;
+      }
+    }
+  }
+
+  function hideHint() {
+    document.getElementById('hintBox').classList.add('hidden');
+  }
+
+  // ============ EFFECTS ============
+  function flyCoin(fromEl, amount) {
+    const fromRect = fromEl.getBoundingClientRect();
+    const coinTarget = document.querySelector('.coin-stat').getBoundingClientRect();
+    for (let i = 0; i < Math.min(amount, 6); i++) {
+      setTimeout(() => {
+        const coin = document.createElement('div');
+        coin.className = 'flying-coin';
+        coin.textContent = '🪙';
+        coin.style.left = (fromRect.left + fromRect.width / 2 - 20) + 'px';
+        coin.style.top = (fromRect.top + fromRect.height / 2 - 20) + 'px';
+        document.body.appendChild(coin);
+        requestAnimationFrame(() => {
+          coin.style.left = (coinTarget.left + coinTarget.width / 2 - 20) + 'px';
+          coin.style.top = (coinTarget.top + coinTarget.height / 2 - 20) + 'px';
+          coin.style.transform = 'scale(0.6)';
+          coin.style.opacity = '0';
+        });
+        setTimeout(() => coin.remove(), 900);
+      }, i * 80);
+    }
+  }
+
+  function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2300);
+  }
+
+  function confettiBurst() {
+    const colors = ['#ff6b9d', '#f0c419', '#74b9ff', '#38d9a9', '#ff7675', '#a29bfe'];
+    for (let i = 0; i < 50; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDuration = (1.8 + Math.random() * 1.4) + 's';
+      c.style.animationDelay = Math.random() * 0.4 + 's';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 3500);
+    }
+  }
+
+  // ============ SOUND ============
+  let audioCtx = null;
+  function getCtx() {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+    }
+    return audioCtx;
+  }
+  function playTone(freq, duration = 0.18, type = 'sine', volume = 0.12) {
+    if (!state.soundOn) return;
+    const ctx = getCtx();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(volume, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  }
+  function playCorrect() {
+    playTone(523.25, 0.12, 'sine');
+    setTimeout(() => playTone(659.25, 0.12, 'sine'), 90);
+    setTimeout(() => playTone(783.99, 0.22, 'sine'), 180);
+  }
+  function playWrong() {
+    playTone(380, 0.14, 'triangle', 0.08);
+    setTimeout(() => playTone(280, 0.18, 'triangle', 0.08), 130);
+  }
+  function playCelebrate() {
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((n, i) => setTimeout(() => playTone(n, 0.18, 'sine'), i * 110));
+  }
+
+  // ============ SPEECH (TTS) ============
+  let hebrewVoice = null;
+  let voicesPromise = null;
+
+  function isHebrewVoice(v) {
+    if (!v) return false;
+    const lang = (v.lang || '').toLowerCase();
+    const name = (v.name || '').toLowerCase();
+    if (lang === 'he-il' || lang === 'he') return true;
+    if (lang.startsWith('he-') || lang.startsWith('he_')) return true;
+    // Older ISO 639-1 code for Hebrew was 'iw'
+    if (lang === 'iw-il' || lang === 'iw') return true;
+    if (lang.startsWith('iw-') || lang.startsWith('iw_')) return true;
+    if (/carmit|hebrew|עברית/i.test(v.name || '')) return true;
+    return false;
+  }
+
+  function detectHebrewVoice() {
+    if (!window.speechSynthesis) return null;
+    const voices = speechSynthesis.getVoices();
+    // Prefer high-quality local voices over network/cloud voices
+    const hebrew = voices.filter(isHebrewVoice);
+    if (hebrew.length === 0) return null;
+    const local = hebrew.find(v => v.localService);
+    return local || hebrew[0];
+  }
+
+  function initVoices() {
+    if (!window.speechSynthesis) return;
+    voicesPromise = new Promise((resolve) => {
+      let resolved = false;
+      const tryDetect = () => {
+        if (resolved) return;
+        const v = detectHebrewVoice();
+        const voices = speechSynthesis.getVoices();
+        if (v || voices.length > 0) {
+          hebrewVoice = v;
+          resolved = true;
+          console.log('[bakery] Hebrew voice:', v ? `${v.name} (${v.lang})` : 'NOT FOUND. TTS disabled.');
+          resolve(v);
+        }
+      };
+      tryDetect();
+      if (!resolved) {
+        speechSynthesis.addEventListener('voiceschanged', tryDetect);
+        // Fallback timeout in case event never fires
+        setTimeout(() => {
+          if (!resolved) {
+            hebrewVoice = detectHebrewVoice();
+            resolved = true;
+            console.log('[bakery] Hebrew voice (timeout):', hebrewVoice ? `${hebrewVoice.name} (${hebrewVoice.lang})` : 'NOT FOUND. TTS disabled.');
+            resolve(hebrewVoice);
+          }
+        }, 2000);
+      }
+    });
+  }
+  initVoices();
+
+  function speakOrder(customer, a, b, pastry) {
+    if (!state.soundOn) return;
+    if (!window.speechSynthesis) return;
+    // Wait for voices to load before first speech
+    (voicesPromise || Promise.resolve()).then(() => {
+      // If no Hebrew voice available, skip TTS entirely (don't speak English)
+      if (!hebrewVoice) return;
+      speechSynthesis.cancel();
+      const text = `אני רוצה ${a} ועוד ${b} ${pastry.namePlural}`;
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.voice = hebrewVoice;
+      utt.lang = hebrewVoice.lang || 'he-IL';
+      utt.pitch = customer.pitch ?? 1.0;
+      utt.rate = customer.rate ?? 1.0;
+      utt.volume = 1.0;
+      const cust = document.getElementById('customerEmoji');
+      utt.onstart = () => cust && cust.classList.add('speaking');
+      utt.onend = () => cust && cust.classList.remove('speaking');
+      utt.onerror = () => cust && cust.classList.remove('speaking');
+      setTimeout(() => {
+        try { speechSynthesis.speak(utt); } catch (e) {}
+      }, 80);
+    });
+  }
+
+  function repeatOrder() {
+    if (!state.currentProblem || !state.lastCustomer) return;
+    const p = state.currentProblem;
+    speakOrder(state.lastCustomer, p.a, p.b, p.pastry);
+  }
+
+  // ============ NAVIGATION ============
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function startGame() {
+    state.level = 1;
+    state.questionInLevel = 0;
+    state.streak = 0;
+    state.attempts = 0;
+    updateStats();
+    state.currentProblem = generateProblem();
+    showScreen('gameScreen');
+    renderQuestion();
+  }
+
+  function continueGame() {
+    state.level++;
+    state.questionInLevel = 0;
+    state.attempts = 0;
+    state.currentProblem = generateProblem();
+    showScreen('gameScreen');
+    renderQuestion();
+  }
+
+  function showLevelUp() {
+    document.getElementById('levelUpTitle').textContent = `כל הכבוד! עברת רמה ${state.level}!`;
+    const nextLvl = LEVELS[state.level];
+    if (nextLvl) {
+      document.getElementById('levelUpText').innerHTML = `עכשיו עוברות לרמה <strong>${nextLvl.name}</strong> 🚀<br>זה הולך להיות מרגש!`;
+    } else {
+      document.getElementById('levelUpText').innerHTML = `סיימת את כל הרמות! 🌟`;
+    }
+    document.getElementById('levelUpEmojis').textContent = ['🎉🌟🎉','🎊🏆🎊','✨🎂✨','🌈🦄🌈'][Math.floor(Math.random()*4)];
+    showScreen('levelUpScreen');
+    confettiBurst();
+    playCelebrate();
+  }
+
+  function openShop() {
+    renderShop();
+    showScreen('shopScreen');
+  }
+  function backFromShop() {
+    if (state.currentProblem) {
+      showScreen('gameScreen');
+    } else {
+      showScreen('startScreen');
+    }
+  }
+
+  function renderShop() {
+    const grid = document.getElementById('shopGrid');
+    grid.innerHTML = '';
+    SHOP_ITEMS.forEach(item => {
+      const count = state.decorations.filter(d => d.id === item.id).length;
+      const canAfford = state.coins >= item.price;
+      const div = document.createElement('div');
+      div.className = 'shop-item' + (canAfford ? '' : ' cant-afford');
+      div.innerHTML = `
+        <span class="shop-emoji">${item.emoji}</span>
+        <div class="shop-name-label">${item.name}</div>
+        <div class="price">🪙 ${item.price}</div>
+        ${count > 0 ? `<div class="owned-label" style="margin-top:4px;">יש לך: ${count}</div>` : ''}
+      `;
+      if (canAfford) {
+        div.addEventListener('click', () => buyItem(item));
+      }
+      grid.appendChild(div);
+    });
+  }
+
+  function buyItem(item) {
+    if (state.coins < item.price) return;
+    state.coins -= item.price;
+
+    // Spawn the new decoration at a random-ish position near center
+    const cx = 0.4 + Math.random() * 0.2;
+    const cy = 0.35 + Math.random() * 0.2;
+    const inst = { id: item.id, uid: state.decoUidCounter++, x: cx, y: cy };
+    state.decorations.push(inst);
+
+    // Add it to the layer immediately so user sees it appear
+    const el = createDecorationEl(inst);
+    document.getElementById('decorationsLayer').appendChild(el);
+
+    saveSave();
+    updateStats();
+    showToast(`קנית ${item.emoji} ${item.name}!`);
+    playCelebrate();
+    renderShop();
+  }
+
+  // ============ INIT ============
+  document.getElementById('shopBtn').addEventListener('click', openShop);
+  document.getElementById('soundBtn').addEventListener('click', () => {
+    state.soundOn = !state.soundOn;
+    document.getElementById('soundBtn').textContent = state.soundOn ? '🔊' : '🔇';
+    saveSave();
+    if (state.soundOn) playCorrect();
+    else if (window.speechSynthesis) speechSynthesis.cancel();
+  });
+  document.getElementById('customerEmoji').addEventListener('click', repeatOrder);
+  document.getElementById('speakAgainBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    repeatOrder();
+  });
+  document.querySelectorAll('.level-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lvl = parseInt(btn.dataset.level, 10);
+      switchLevel(lvl);
+    });
+  });
+
+  loadSave();
+  updateStats();
+  document.getElementById('soundBtn').textContent = state.soundOn ? '🔊' : '🔇';
+  renderDecorationsLayer();
+</script>
+
+</body>
+</html>
