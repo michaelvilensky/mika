@@ -10,3 +10,8 @@
 .idea/
 *.swp
 *~
+
+# Node (in case we add a build step later)
+node_modules/
+package-lock.json
+*.log

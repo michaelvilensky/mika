@@ -1,0 +1,28 @@
+# Netlify config for mika-bakery (monorepo: only deploy this subfolder)
+[build]
+  base    = "mika-bakery"
+  publish = "mika-bakery"
+  # Skip the build if no files changed inside mika-bakery/ since the previous commit.
+  # `git diff --quiet` exits 0 (skip) when there are no differences, 1 (build) otherwise.
+  ignore  = "git diff --quiet HEAD^ HEAD -- mika-bakery/"
+
+[build.environment]
+  # No build step — pure static site.
+  NODE_VERSION = "20"
+
+# Long-lived cache for static assets that rarely change.
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/*.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# Don't cache index.html — we want updates to land immediately on refresh.
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
