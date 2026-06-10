@@ -825,6 +825,9 @@
     <div id="profilePickerScreen" class="screen active">
       <h1>מי משחק היום? 🧁</h1>
       <div class="profile-grid" id="profileGrid"></div>
+      <div style="text-align:center; margin-top: 8px;">
+        <button class="big-btn secondary" onclick="openImportForm()" style="font-size: 1rem; padding: 12px 22px; background: linear-gradient(135deg, #a29bfe, #6c5ce7); box-shadow: 0 5px 0 #4834d4, 0 8px 14px rgba(0,0,0,0.12);">🔑 יש לי קוד מהמכשיר השני</button>
+      </div>
     </div>
 
     <!-- NEW PROFILE SCREEN -->
@@ -838,13 +841,28 @@
         <div class="avatar-grid" id="avatarGrid"></div>
 
         <div class="sync-code-display" id="newProfileSyncPreview" style="display:none;">
-          <span class="sync-label">קוד סנכרון (שמרי לעתיד)</span>
+          <span class="sync-label">קוד סנכרון - שמרי לעתיד!</span>
           <span id="newProfileSyncCode">—</span>
+          <span class="sync-label" style="margin-top: 6px;">השתמשי בקוד הזה כדי להמשיך לשחק במכשיר אחר</span>
         </div>
 
         <div class="form-buttons">
           <button class="big-btn" onclick="confirmNewProfile()">צרי שחקן ✨</button>
           <button class="big-btn secondary" onclick="cancelNewProfile()" style="font-size: 1.05rem; padding: 14px 22px;">ביטול</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMPORT PROFILE SCREEN -->
+    <div id="importProfileScreen" class="screen">
+      <h1>🔑 ייבוא שחקן</h1>
+      <div class="profile-form">
+        <label for="importCodeInput">הקלידי את קוד הסנכרון מהמכשיר השני:</label>
+        <input type="text" id="importCodeInput" placeholder="ABC-123" maxlength="7" autocomplete="off" autocapitalize="characters" style="font-family: ui-monospace, 'SF Mono', monospace; font-size: 1.6rem; letter-spacing: 4px; direction: ltr;">
+        <div id="importStatus" style="text-align:center; min-height: 1.5em; margin-bottom: 12px; font-weight: 700;"></div>
+        <div class="form-buttons">
+          <button class="big-btn" onclick="confirmImport()" id="importConfirmBtn">ייבוא 📥</button>
+          <button class="big-btn secondary" onclick="cancelImport()" style="font-size: 1.05rem; padding: 14px 22px;">ביטול</button>
         </div>
       </div>
     </div>
@@ -856,7 +874,10 @@
       <p id="startScreenSubtitle">הלקוחות רעבים ומחכים<br>להזמנות שלך 🐰🐻🦊</p>
       <button class="big-btn" onclick="startGame()">בואי נתחיל! ✨</button>
       <button class="big-btn secondary" onclick="openShop()" style="font-size: 1.1rem; padding: 12px 24px;">🛍️ חנות הקישוטים</button>
-      <button class="big-btn secondary" onclick="switchPlayer()" style="font-size: 1rem; padding: 10px 20px; background: linear-gradient(135deg, #ffa07a, #ff6b6b); box-shadow: 0 5px 0 #c44545, 0 8px 14px rgba(0,0,0,0.12);">👋 החליפי שחקן</button>
+      <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 4px;">
+        <button class="big-btn secondary" onclick="switchPlayer()" style="font-size: 1rem; padding: 10px 20px; background: linear-gradient(135deg, #ffa07a, #ff6b6b); box-shadow: 0 5px 0 #c44545, 0 8px 14px rgba(0,0,0,0.12);">👋 החליפי שחקן</button>
+        <button class="big-btn secondary" onclick="showMySyncCode()" style="font-size: 1rem; padding: 10px 20px; background: linear-gradient(135deg, #a29bfe, #6c5ce7); box-shadow: 0 5px 0 #4834d4, 0 8px 14px rgba(0,0,0,0.12);">🔑 הקוד שלי</button>
+      </div>
     </div>
 
     <!-- GAME SCREEN -->
@@ -1115,6 +1136,46 @@
       soundOn: state.soundOn,
     };
     try { localStorage.setItem(profileKey(profile.id), JSON.stringify(profile)); } catch (e) {}
+    schedulePush(); // best-effort, fails silently if offline
+  }
+
+  // ============ CLOUD SYNC (Layer 2: Netlify Functions + Blobs) ============
+  const CLOUD_API_BASE  = '/api/profile';
+  const PUSH_DEBOUNCE_MS = 2000;
+  let pushTimer = null;
+
+  async function pushProfile(profile) {
+    if (!profile || !profile.syncCode) return;
+    const r = await fetch(CLOUD_API_BASE + '/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ syncCode: profile.syncCode, profile }),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.json();
+  }
+
+  async function pullProfile(syncCode) {
+    const r = await fetch(CLOUD_API_BASE + '/load?code=' + encodeURIComponent(syncCode), {
+      headers: { 'Accept': 'application/json' },
+    });
+    if (r.status === 404) return null;
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    return data.profile || null;
+  }
+
+  // Debounced push triggered by every saveSave().
+  // Reads the just-saved profile from localStorage so we push the full latest snapshot.
+  function schedulePush() {
+    if (!state.profileId) return;
+    if (pushTimer) clearTimeout(pushTimer);
+    pushTimer = setTimeout(() => {
+      pushTimer = null;
+      const profile = loadProfile(state.profileId);
+      if (!profile) return;
+      pushProfile(profile).catch(e => console.warn('[bakery] cloud push failed:', e.message));
+    }, PUSH_DEBOUNCE_MS);
   }
 
   // One-time migration: wrap pre-V4 single save into a default profile
@@ -1729,7 +1790,7 @@
   }
 
   // ============ NAVIGATION ============
-  const PROFILE_PICKER_SCREENS = new Set(['profilePickerScreen', 'newProfileScreen']);
+  const PROFILE_PICKER_SCREENS = new Set(['profilePickerScreen', 'newProfileScreen', 'importProfileScreen']);
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -1781,11 +1842,16 @@
   }
 
   let newProfileSelectedAvatar = AVATARS[0];
+  let pendingNewProfile = null; // set after creation; second click on confirm continues
 
   function openNewProfileForm() {
     newProfileSelectedAvatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
+    pendingNewProfile = null;
     document.getElementById('newProfileName').value = '';
     document.getElementById('newProfileSyncPreview').style.display = 'none';
+    // reset confirm button label
+    const confirmBtn = document.querySelector('#newProfileScreen .big-btn');
+    if (confirmBtn) confirmBtn.textContent = 'צרי שחקן ✨';
     renderAvatarGrid();
     showScreen('newProfileScreen');
     setTimeout(() => {
@@ -1811,6 +1877,14 @@
   }
 
   function confirmNewProfile() {
+    // Second click on the confirm button (after creation) just continues to game
+    if (pendingNewProfile) {
+      const id = pendingNewProfile.id;
+      pendingNewProfile = null;
+      switchToProfile(id);
+      goToStart();
+      return;
+    }
     const nameEl = document.getElementById('newProfileName');
     const name = (nameEl.value || '').trim();
     if (!name) {
@@ -1820,22 +1894,94 @@
       return;
     }
     const profile = createProfile(name, newProfileSelectedAvatar);
-    // Briefly show the new sync code so parent can save it for future Layer 2 sync
+    pendingNewProfile = profile;
+
+    // Show the sync code so the parent can save it for the other device
     document.getElementById('newProfileSyncCode').textContent = profile.syncCode;
     document.getElementById('newProfileSyncPreview').style.display = '';
-    setTimeout(() => {
-      switchToProfile(profile.id);
-      goToStart();
-    }, 1200);
+    const confirmBtn = document.querySelector('#newProfileScreen .big-btn');
+    if (confirmBtn) confirmBtn.textContent = 'המשך לשחק ➡️';
+
+    // Fire-and-forget cloud push
+    pushProfile(profile).catch(e => console.warn('[bakery] initial push failed:', e.message));
   }
 
   function cancelNewProfile() {
-    if (loadAllProfiles().length === 0) {
-      // user has no profiles yet — keep them on picker
-      showScreen('profilePickerScreen');
-    } else {
-      showScreen('profilePickerScreen');
+    pendingNewProfile = null;
+    showScreen('profilePickerScreen');
+  }
+
+  // ---------- Import (cross-device) ----------
+  function openImportForm() {
+    const input = document.getElementById('importCodeInput');
+    input.value = '';
+    document.getElementById('importStatus').textContent = '';
+    showScreen('importProfileScreen');
+    setTimeout(() => input.focus(), 100);
+  }
+
+  function cancelImport() {
+    showScreen('profilePickerScreen');
+  }
+
+  async function confirmImport() {
+    const input  = document.getElementById('importCodeInput');
+    const status = document.getElementById('importStatus');
+    const btn    = document.getElementById('importConfirmBtn');
+
+    // Accept either "ABC-123" or "ABC123" (auto-format)
+    let raw = (input.value || '').toUpperCase().replace(/[^A-Z2-9]/g, '');
+    if (raw.length === 6) raw = raw.slice(0, 3) + '-' + raw.slice(3);
+    if (!/^[A-Z2-9]{3}-[A-Z2-9]{3}$/.test(raw)) {
+      status.textContent = '❌ הקוד לא תקין (XXX-XXX)';
+      status.style.color = '#c44545';
+      return;
     }
+
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    status.textContent = '🔄 מחפש...';
+    status.style.color = '#5c3a1e';
+
+    try {
+      const cloudProfile = await pullProfile(raw);
+      if (!cloudProfile) {
+        status.textContent = '❌ הקוד לא נמצא';
+        status.style.color = '#c44545';
+        return;
+      }
+      // If we already have this sync code locally, update in place
+      const existing = loadAllProfiles().find(p => p.syncCode === raw);
+      const localId = existing ? existing.id : ('p-imp-' + Math.random().toString(36).slice(2, 10));
+      const merged = {
+        ...cloudProfile,
+        id: localId,
+        syncCode: raw,
+      };
+      persistProfile(merged);
+      status.textContent = `✅ שלום ${cloudProfile.name || ''}!`;
+      status.style.color = '#0b6b4b';
+      setTimeout(() => {
+        switchToProfile(localId);
+        goToStart();
+      }, 700);
+    } catch (e) {
+      status.textContent = '❌ שגיאה: ' + (e.message || 'נסי שוב');
+      status.style.color = '#c44545';
+    } finally {
+      btn.disabled = false;
+      btn.style.opacity = '';
+    }
+  }
+
+  // ---------- Show user's own sync code ----------
+  function showMySyncCode() {
+    if (!state.profileSyncCode) return;
+    // prompt() so the parent can easily copy the code text
+    prompt(
+      `הקוד של ${state.profileName}\n\nהשתמשי בקוד הזה במכשיר אחר כדי להמשיך לשחק עם הפרופיל הזה.\nאת יכולה להעתיק אותו עכשיו:`,
+      state.profileSyncCode
+    );
   }
 
   function pickProfile(id) {
@@ -1995,6 +2141,16 @@
   document.getElementById('newProfileName').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') confirmNewProfile();
     if (e.key === 'Escape') cancelNewProfile();
+  });
+  document.getElementById('importCodeInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') confirmImport();
+    if (e.key === 'Escape') cancelImport();
+  });
+  // Auto-format sync code input: insert dash after 3 chars
+  document.getElementById('importCodeInput').addEventListener('input', (e) => {
+    let v = e.target.value.toUpperCase().replace(/[^A-Z2-9]/g, '');
+    if (v.length > 3) v = v.slice(0, 3) + '-' + v.slice(3, 6);
+    e.target.value = v;
   });
 
   // Boot: migrate any pre-V4 save, then route to picker or active profile
