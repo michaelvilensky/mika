@@ -118,6 +118,187 @@
   }
   .screen.active { display: flex; }
 
+  /* Profile picker screen */
+  #profilePickerScreen, #newProfileScreen {
+    background: linear-gradient(160deg, #fff 0%, #fff5e6 100%);
+    align-items: center;
+  }
+  #profilePickerScreen h1, #newProfileScreen h1 {
+    color: #d63384;
+    margin-bottom: 18px;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 900;
+  }
+  .profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 14px;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 20px;
+  }
+  .profile-card {
+    background: white;
+    border: 4px solid #f1c2d8;
+    border-radius: 22px;
+    padding: 18px 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 5px 0 #f1c2d8, 0 8px 14px rgba(0,0,0,0.08);
+    position: relative;
+    user-select: none;
+  }
+  .profile-card:hover { transform: translateY(-3px); border-color: #ff6b9d; }
+  .profile-card:active { transform: translateY(2px); box-shadow: 0 2px 0 #f1c2d8; }
+  .profile-card .profile-avatar { font-size: 3.6rem; line-height: 1; display: block; }
+  .profile-card .profile-name { font-weight: 900; font-size: 1.15rem; margin-top: 6px; color: #5c3a1e; }
+  .profile-card .profile-coins {
+    font-size: 0.9rem;
+    color: #d63384;
+    margin-top: 4px;
+    background: #fff8d0;
+    border-radius: 12px;
+    padding: 2px 8px;
+    display: inline-block;
+  }
+  .profile-card .profile-delete {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    background: white;
+    border: 2px solid #ff6b6b;
+    color: #ff6b6b;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    font-size: 0.9rem;
+    font-weight: 900;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    transition: transform 0.15s, background 0.2s;
+  }
+  .profile-card .profile-delete:hover { background: #ff6b6b; color: white; transform: scale(1.15); }
+  .profile-add-card {
+    background: #fff5e6;
+    border: 4px dashed #d4a574;
+    border-radius: 22px;
+    padding: 18px 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.15s, background 0.2s;
+    color: #d4a574;
+    font-weight: 900;
+  }
+  .profile-add-card:hover { transform: translateY(-3px); background: #fff8d0; }
+  .profile-add-card .add-plus { font-size: 3.6rem; line-height: 1; display: block; }
+  .profile-add-card .add-label { font-size: 1.05rem; margin-top: 6px; }
+
+  /* New profile form */
+  .profile-form {
+    background: white;
+    border: 4px solid #f1c2d8;
+    border-radius: 22px;
+    padding: 22px;
+    width: 100%;
+    max-width: 520px;
+  }
+  .profile-form label {
+    display: block;
+    font-weight: 900;
+    color: #5c3a1e;
+    margin-bottom: 6px;
+    font-size: 1.05rem;
+  }
+  .profile-form input[type="text"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 3px solid #f1c2d8;
+    border-radius: 14px;
+    font-size: 1.2rem;
+    font-family: inherit;
+    margin-bottom: 18px;
+    background: #fff5e6;
+    color: #5c3a1e;
+    text-align: center;
+    direction: rtl;
+  }
+  .profile-form input[type="text"]:focus {
+    outline: none;
+    border-color: #ff6b9d;
+    background: white;
+  }
+  .avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+  @media (max-width: 600px) { .avatar-grid { grid-template-columns: repeat(6, 1fr); } }
+  .avatar-option {
+    background: #fff5e6;
+    border: 3px solid transparent;
+    border-radius: 14px;
+    padding: 6px 0;
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: transform 0.12s, border-color 0.15s, background 0.2s;
+  }
+  .avatar-option:hover { transform: scale(1.1); }
+  .avatar-option.selected {
+    border-color: #ff6b9d;
+    background: white;
+    box-shadow: 0 0 0 3px #fff8d0;
+  }
+  .form-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+  /* Profile chip in header */
+  .profile-chip {
+    background: linear-gradient(135deg, #fff5e6, #ffe0eb);
+    border: 3px solid #f1c2d8;
+    border-radius: 22px;
+    padding: 4px 12px 4px 6px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #5c3a1e;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.12s, border-color 0.2s;
+  }
+  .profile-chip:hover { transform: translateY(-1px); border-color: #ff6b9d; }
+  .profile-chip .chip-avatar { font-size: 1.4rem; line-height: 1; }
+  .profile-chip .chip-name { white-space: nowrap; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Sync code card (informational, used later by Layer 2 too) */
+  .sync-code-display {
+    background: #fff8d0;
+    border: 3px dashed #f0c419;
+    border-radius: 14px;
+    padding: 10px 16px;
+    text-align: center;
+    margin: 12px 0;
+    font-family: ui-monospace, 'SF Mono', monospace;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #b78400;
+    letter-spacing: 2px;
+    direction: ltr;
+  }
+  .sync-code-display .sync-label {
+    display: block;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #6c4a2c;
+    letter-spacing: 0;
+    margin-bottom: 4px;
+  }
+
   /* Start screen */
   #startScreen {
     text-align: center;
@@ -626,8 +807,12 @@
 
 <div id="app">
   <header>
-    <div class="shop-name">🧁 המאפיה של מיקה</div>
+    <div class="shop-name" id="shopNameHeader">🧁 המאפיה של מיקה</div>
     <div class="stats">
+      <button class="profile-chip" id="profileChip" title="החליפי שחקן" style="display:none;">
+        <span class="chip-avatar" id="chipAvatar">🦄</span>
+        <span class="chip-name" id="chipName">—</span>
+      </button>
       <div class="stat coin-stat"><span class="icon">🪙</span><span id="coinsDisplay">0</span></div>
       <div class="stat streak-stat" id="streakStatWrapper" style="display:none;"><span class="icon">🔥</span><span id="streakDisplay">0</span></div>
       <button class="icon-btn" id="soundBtn" title="סאונד">🔊</button>
@@ -636,13 +821,42 @@
   </header>
 
   <main>
+    <!-- PROFILE PICKER SCREEN -->
+    <div id="profilePickerScreen" class="screen active">
+      <h1>מי משחק היום? 🧁</h1>
+      <div class="profile-grid" id="profileGrid"></div>
+    </div>
+
+    <!-- NEW PROFILE SCREEN -->
+    <div id="newProfileScreen" class="screen">
+      <h1>שחקן חדש 🌟</h1>
+      <div class="profile-form">
+        <label for="newProfileName">מה השם שלך?</label>
+        <input type="text" id="newProfileName" placeholder="הקלידי את השם..." maxlength="20" autocomplete="off">
+
+        <label>בחרי דמות:</label>
+        <div class="avatar-grid" id="avatarGrid"></div>
+
+        <div class="sync-code-display" id="newProfileSyncPreview" style="display:none;">
+          <span class="sync-label">קוד סנכרון (שמרי לעתיד)</span>
+          <span id="newProfileSyncCode">—</span>
+        </div>
+
+        <div class="form-buttons">
+          <button class="big-btn" onclick="confirmNewProfile()">צרי שחקן ✨</button>
+          <button class="big-btn secondary" onclick="cancelNewProfile()" style="font-size: 1.05rem; padding: 14px 22px;">ביטול</button>
+        </div>
+      </div>
+    </div>
+
     <!-- START SCREEN -->
-    <div id="startScreen" class="screen active">
-      <div class="hero-emoji">🧁🍪🎂</div>
-      <h1>ברוכים הבאים<br>למאפיה של מיקה!</h1>
-      <p>הלקוחות רעבים ומחכים<br>להזמנות שלך 🐰🐻🦊</p>
+    <div id="startScreen" class="screen">
+      <div class="hero-emoji" id="startScreenAvatar">🧁🍪🎂</div>
+      <h1 id="startScreenTitle">ברוכים הבאים<br>למאפיה של מיקה!</h1>
+      <p id="startScreenSubtitle">הלקוחות רעבים ומחכים<br>להזמנות שלך 🐰🐻🦊</p>
       <button class="big-btn" onclick="startGame()">בואי נתחיל! ✨</button>
       <button class="big-btn secondary" onclick="openShop()" style="font-size: 1.1rem; padding: 12px 24px;">🛍️ חנות הקישוטים</button>
+      <button class="big-btn secondary" onclick="switchPlayer()" style="font-size: 1rem; padding: 10px 20px; background: linear-gradient(135deg, #ffa07a, #ff6b6b); box-shadow: 0 5px 0 #c44545, 0 8px 14px rgba(0,0,0,0.12);">👋 החליפי שחקן</button>
     </div>
 
     <!-- GAME SCREEN -->
@@ -699,23 +913,52 @@
 
 <script>
   // ============ STATE ============
-  const STORAGE_KEY = 'mika-bakery-save-v1';
+  const OLD_STORAGE_KEY    = 'mika-bakery-save-v1';   // pre-V4 single-save
+  const PROFILES_LIST_KEY  = 'mika-bakery:profiles';
+  const ACTIVE_KEY         = 'mika-bakery:active-profile';
+  function profileKey(id) { return 'mika-bakery:profile:' + id; }
+
   // decorations: array of {id, uid, x, y} where x,y are fractions of viewport (0..1)
   const state = {
+    // -- profile metadata (V4) --
+    profileId: null,
+    profileName: '',
+    profileAvatar: '',
+    profileSyncCode: '',
+    // -- per-profile save fields --
     coins: 0,
     decorations: [],
     decoUidCounter: 1,
     bestStreak: 0,
     totalCorrect: 0,
     soundOn: true,
-    // session
+    // -- session-only (not saved) --
     level: 1,
     questionInLevel: 0,
     streak: 0,
     currentProblem: null,
     attempts: 0,
     lastProblemKey: null,
+    lastCustomer: null,
   };
+
+  // Selectable avatars for new profiles
+  const AVATARS = ['🦄','🐰','🐻','🦊','🐱','🐶','🦁','🐼','🐸','🐲','🦉','🦒','🌟','🌈','🎂','🧁'];
+
+  // Sync code alphabet — no visually confusing chars (0/O, 1/I/L)
+  const SYNC_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  function generateSyncCode() {
+    const part = (n) => {
+      let s = '';
+      for (let i = 0; i < n; i++) s += SYNC_ALPHABET[Math.floor(Math.random() * SYNC_ALPHABET.length)];
+      return s;
+    };
+    return part(3) + '-' + part(3);
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+  }
 
   // ============ CONSTANTS ============
   const PASTRIES = [
@@ -764,48 +1007,135 @@
     { id: 3, name: 'גדולים', questions: 8, generate: genFull },
   ];
 
-  // ============ STORAGE ============
-  function loadSave() {
+  // ============ PROFILES & STORAGE ============
+  function loadProfile(id) {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const data = JSON.parse(raw);
-        state.coins = data.coins || 0;
-        state.bestStreak = data.bestStreak || 0;
-        state.totalCorrect = data.totalCorrect || 0;
-        state.soundOn = data.soundOn !== false;
-        state.decoUidCounter = data.decoUidCounter || 1;
-
-        const decos = data.decorations || [];
-        // Migrate old format (array of id strings) to new format (array of instances)
-        if (decos.length > 0 && typeof decos[0] === 'string') {
-          state.decorations = decos.map((id, i) => ({
-            id,
-            uid: state.decoUidCounter++,
-            x: 0.1 + (i % 5) * 0.15,
-            y: 0.12 + Math.floor(i / 5) * 0.15,
-          }));
-        } else {
-          state.decorations = decos;
-          // make sure counter is past max uid
-          decos.forEach(d => {
-            if (d.uid >= state.decoUidCounter) state.decoUidCounter = d.uid + 1;
-          });
-        }
-      }
-    } catch (e) { /* ignore */ }
+      const raw = localStorage.getItem(profileKey(id));
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
   }
-  function saveSave() {
+
+  function loadAllProfiles() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        coins: state.coins,
-        decorations: state.decorations,
-        decoUidCounter: state.decoUidCounter,
-        bestStreak: state.bestStreak,
-        totalCorrect: state.totalCorrect,
-        soundOn: state.soundOn,
+      const raw = localStorage.getItem(PROFILES_LIST_KEY);
+      if (!raw) return [];
+      const ids = JSON.parse(raw);
+      return ids.map(id => loadProfile(id)).filter(Boolean);
+    } catch (e) { return []; }
+  }
+
+  function persistProfile(profile) {
+    localStorage.setItem(profileKey(profile.id), JSON.stringify(profile));
+    const ids = JSON.parse(localStorage.getItem(PROFILES_LIST_KEY) || '[]');
+    if (!ids.includes(profile.id)) {
+      ids.push(profile.id);
+      localStorage.setItem(PROFILES_LIST_KEY, JSON.stringify(ids));
+    }
+  }
+
+  function createProfile(name, avatar) {
+    const id = 'p-' + Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6);
+    const profile = {
+      id,
+      name: (name || 'שחקן').trim().slice(0, 20),
+      avatar: avatar || AVATARS[0],
+      syncCode: generateSyncCode(),
+      createdAt: 0, // can't use Date.now() in scripts; set lazily on first save
+      save: {
+        coins: 0,
+        decorations: [],
+        decoUidCounter: 1,
+        bestStreak: 0,
+        totalCorrect: 0,
+        soundOn: true,
+      },
+    };
+    persistProfile(profile);
+    return profile;
+  }
+
+  function deleteProfile(id) {
+    try { localStorage.removeItem(profileKey(id)); } catch (e) {}
+    try {
+      const ids = JSON.parse(localStorage.getItem(PROFILES_LIST_KEY) || '[]');
+      localStorage.setItem(PROFILES_LIST_KEY, JSON.stringify(ids.filter(i => i !== id)));
+    } catch (e) {}
+    if (localStorage.getItem(ACTIVE_KEY) === id) localStorage.removeItem(ACTIVE_KEY);
+  }
+
+  function applySaveToState(save) {
+    state.coins = save.coins || 0;
+    state.decoUidCounter = save.decoUidCounter || 1;
+    state.bestStreak = save.bestStreak || 0;
+    state.totalCorrect = save.totalCorrect || 0;
+    state.soundOn = save.soundOn !== false;
+
+    const decos = save.decorations || [];
+    // Migrate old format (array of id strings) to new format (array of instances)
+    if (decos.length > 0 && typeof decos[0] === 'string') {
+      state.decorations = decos.map((id, i) => ({
+        id,
+        uid: state.decoUidCounter++,
+        x: 0.1 + (i % 5) * 0.15,
+        y: 0.12 + Math.floor(i / 5) * 0.15,
       }));
-    } catch (e) { /* ignore */ }
+    } else {
+      state.decorations = decos;
+      decos.forEach(d => {
+        if (d.uid >= state.decoUidCounter) state.decoUidCounter = d.uid + 1;
+      });
+    }
+  }
+
+  function switchToProfile(id) {
+    const profile = loadProfile(id);
+    if (!profile) return false;
+    state.profileId       = profile.id;
+    state.profileName     = profile.name;
+    state.profileAvatar   = profile.avatar;
+    state.profileSyncCode = profile.syncCode;
+    applySaveToState(profile.save || {});
+    try { localStorage.setItem(ACTIVE_KEY, id); } catch (e) {}
+    return true;
+  }
+
+  function saveSave() {
+    if (!state.profileId) return;
+    const profile = loadProfile(state.profileId);
+    if (!profile) return;
+    profile.name      = state.profileName;
+    profile.avatar    = state.profileAvatar;
+    profile.syncCode  = state.profileSyncCode || profile.syncCode;
+    profile.save = {
+      coins: state.coins,
+      decorations: state.decorations,
+      decoUidCounter: state.decoUidCounter,
+      bestStreak: state.bestStreak,
+      totalCorrect: state.totalCorrect,
+      soundOn: state.soundOn,
+    };
+    try { localStorage.setItem(profileKey(profile.id), JSON.stringify(profile)); } catch (e) {}
+  }
+
+  // One-time migration: wrap pre-V4 single save into a default profile
+  function migrateOldSave() {
+    if (loadAllProfiles().length > 0) return null;
+    const oldRaw = localStorage.getItem(OLD_STORAGE_KEY);
+    if (!oldRaw) return null;
+    try {
+      const oldSave = JSON.parse(oldRaw);
+      const profile = createProfile('מיקה', '🦄');
+      profile.save = {
+        coins:          oldSave.coins          || 0,
+        decorations:    oldSave.decorations    || [],
+        decoUidCounter: oldSave.decoUidCounter || 1,
+        bestStreak:     oldSave.bestStreak     || 0,
+        totalCorrect:   oldSave.totalCorrect   || 0,
+        soundOn:        oldSave.soundOn !== false,
+      };
+      persistProfile(profile);
+      return profile.id;
+    } catch (e) { return null; }
   }
 
   // ============ PROBLEM GENERATORS ============
@@ -1399,9 +1729,158 @@
   }
 
   // ============ NAVIGATION ============
+  const PROFILE_PICKER_SCREENS = new Set(['profilePickerScreen', 'newProfileScreen']);
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+    // Hide chrome (header + decoration layer) on profile picker so it's clean
+    const isPicker = PROFILE_PICKER_SCREENS.has(id);
+    document.querySelector('header').style.display = isPicker ? 'none' : '';
+    document.getElementById('decorationsLayer').style.display = isPicker ? 'none' : '';
+  }
+
+  // ============ PROFILE UI ============
+  function renderProfilePicker() {
+    const grid = document.getElementById('profileGrid');
+    grid.innerHTML = '';
+    const profiles = loadAllProfiles();
+    profiles.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'profile-card';
+      const coins = (p.save && p.save.coins) || 0;
+      card.innerHTML =
+        `<button class="profile-delete" data-id="${escapeHtml(p.id)}" title="מחיקה">✕</button>` +
+        `<span class="profile-avatar">${escapeHtml(p.avatar || '🦄')}</span>` +
+        `<div class="profile-name">${escapeHtml(p.name)}</div>` +
+        (coins > 0 ? `<div class="profile-coins">🪙 ${coins}</div>` : '');
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.profile-delete')) return;
+        pickProfile(p.id);
+      });
+      grid.appendChild(card);
+    });
+
+    grid.querySelectorAll('.profile-delete').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        const prof = loadProfile(id);
+        if (!prof) return;
+        if (confirm(`למחוק את הפרופיל של ${prof.name}? כל המטבעות והקישוטים יימחקו!`)) {
+          deleteProfile(id);
+          renderProfilePicker();
+        }
+      });
+    });
+
+    const addCard = document.createElement('div');
+    addCard.className = 'profile-add-card';
+    addCard.innerHTML = `<span class="add-plus">+</span><div class="add-label">הוסיפי שחקן</div>`;
+    addCard.addEventListener('click', openNewProfileForm);
+    grid.appendChild(addCard);
+  }
+
+  let newProfileSelectedAvatar = AVATARS[0];
+
+  function openNewProfileForm() {
+    newProfileSelectedAvatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
+    document.getElementById('newProfileName').value = '';
+    document.getElementById('newProfileSyncPreview').style.display = 'none';
+    renderAvatarGrid();
+    showScreen('newProfileScreen');
+    setTimeout(() => {
+      const input = document.getElementById('newProfileName');
+      if (input) input.focus();
+    }, 100);
+  }
+
+  function renderAvatarGrid() {
+    const grid = document.getElementById('avatarGrid');
+    grid.innerHTML = '';
+    AVATARS.forEach(a => {
+      const opt = document.createElement('button');
+      opt.type = 'button';
+      opt.className = 'avatar-option' + (a === newProfileSelectedAvatar ? ' selected' : '');
+      opt.textContent = a;
+      opt.addEventListener('click', () => {
+        newProfileSelectedAvatar = a;
+        renderAvatarGrid();
+      });
+      grid.appendChild(opt);
+    });
+  }
+
+  function confirmNewProfile() {
+    const nameEl = document.getElementById('newProfileName');
+    const name = (nameEl.value || '').trim();
+    if (!name) {
+      nameEl.focus();
+      nameEl.style.borderColor = '#ff6b6b';
+      setTimeout(() => { nameEl.style.borderColor = ''; }, 1500);
+      return;
+    }
+    const profile = createProfile(name, newProfileSelectedAvatar);
+    // Briefly show the new sync code so parent can save it for future Layer 2 sync
+    document.getElementById('newProfileSyncCode').textContent = profile.syncCode;
+    document.getElementById('newProfileSyncPreview').style.display = '';
+    setTimeout(() => {
+      switchToProfile(profile.id);
+      goToStart();
+    }, 1200);
+  }
+
+  function cancelNewProfile() {
+    if (loadAllProfiles().length === 0) {
+      // user has no profiles yet — keep them on picker
+      showScreen('profilePickerScreen');
+    } else {
+      showScreen('profilePickerScreen');
+    }
+  }
+
+  function pickProfile(id) {
+    if (!switchToProfile(id)) return;
+    goToStart();
+  }
+
+  function goToStart() {
+    updateProfileChip();
+    updateStartScreen();
+    updateStats();
+    renderDecorationsLayer();
+    document.getElementById('soundBtn').textContent = state.soundOn ? '🔊' : '🔇';
+    showScreen('startScreen');
+  }
+
+  function updateProfileChip() {
+    const chip = document.getElementById('profileChip');
+    if (!state.profileId) {
+      chip.style.display = 'none';
+      return;
+    }
+    chip.style.display = 'flex';
+    document.getElementById('chipAvatar').textContent = state.profileAvatar || '🦄';
+    document.getElementById('chipName').textContent = state.profileName || '';
+  }
+
+  function updateStartScreen() {
+    const avatar = state.profileAvatar || '🦄';
+    document.getElementById('startScreenAvatar').textContent = avatar + '🧁';
+    document.getElementById('startScreenTitle').innerHTML = `שלום ${escapeHtml(state.profileName)}!<br>בואי נאפה 🍪`;
+    // Personalize shop name in header
+    document.getElementById('shopNameHeader').innerHTML = `🧁 המאפיה של ${escapeHtml(state.profileName)}`;
+  }
+
+  function switchPlayer() {
+    saveSave();
+    try { localStorage.removeItem(ACTIVE_KEY); } catch (e) {}
+    state.profileId = null;
+    state.profileName = '';
+    state.profileAvatar = '';
+    state.currentProblem = null;
+    document.getElementById('decorationsLayer').innerHTML = '';
+    renderProfilePicker();
+    showScreen('profilePickerScreen');
   }
 
   function startGame() {
@@ -1512,11 +1991,24 @@
       switchLevel(lvl);
     });
   });
+  document.getElementById('profileChip').addEventListener('click', switchPlayer);
+  document.getElementById('newProfileName').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') confirmNewProfile();
+    if (e.key === 'Escape') cancelNewProfile();
+  });
 
-  loadSave();
-  updateStats();
-  document.getElementById('soundBtn').textContent = state.soundOn ? '🔊' : '🔇';
-  renderDecorationsLayer();
+  // Boot: migrate any pre-V4 save, then route to picker or active profile
+  (function boot() {
+    migrateOldSave();
+    const activeId = localStorage.getItem(ACTIVE_KEY);
+    if (activeId && loadProfile(activeId)) {
+      switchToProfile(activeId);
+      goToStart();
+    } else {
+      renderProfilePicker();
+      showScreen('profilePickerScreen');
+    }
+  })();
 </script>
 
 </body>
