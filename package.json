@@ -1,0 +1,9 @@
+{
+  "name": "mika-projects",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Mika family projects monorepo (deployed via Netlify)",
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}

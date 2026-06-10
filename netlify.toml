@@ -3,11 +3,13 @@
 # We pin base = "." (repo root) here so that any leftover base value in the
 # Netlify UI is overridden — toml beats UI.
 [build]
-  base    = "."
-  publish = "mika-bakery"
-  # Skip the deploy if no files changed inside mika-bakery/ since the previous commit.
-  # `git diff --quiet` exits 0 (skip) when there are no differences, 1 (build) otherwise.
-  ignore  = "git diff --quiet HEAD^ HEAD -- mika-bakery/"
+  base      = "."
+  publish   = "mika-bakery"
+  functions = "netlify/functions"
+  # Skip the deploy unless something deployable changed: the site itself,
+  # the serverless functions, this toml, or root package files.
+  # `git diff --quiet` exits 0 (skip) when ALL listed paths are unchanged.
+  ignore    = "git diff --quiet HEAD^ HEAD -- mika-bakery/ netlify/ netlify.toml package.json package-lock.json"
 
 [build.environment]
   # No build step — pure static site.
