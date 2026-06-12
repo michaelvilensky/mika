@@ -1,0 +1,20 @@
+# Netlify config for alon-missions (sibling site in the same monorepo)
+# Connect a separate Netlify site to the repo with UI base = "alon-missions".
+# Netlify will then pick up THIS toml (the in-base one wins over root toml).
+[build]
+  base      = "alon-missions"
+  publish   = "."  # = alon-missions itself
+  functions = "netlify/functions"
+  # Skip the deploy unless something inside alon-missions/ changed.
+  # `--quiet` exits 0 (skip) when no diffs, 1 (build) otherwise.
+  ignore    = "git diff --quiet HEAD^ HEAD -- ."
+
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
