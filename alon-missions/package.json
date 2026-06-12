@@ -1,0 +1,9 @@
+{
+  "name": "alon-missions",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Alon's number game — local Netlify site",
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}

@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#4fc3f7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="המשימות של אלון">
+<title>🚓 המשימות של אלון 🦸</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Heebo', system-ui, sans-serif;
+    background: linear-gradient(180deg, #4fc3f7 0%, #81d4fa 50%, #b3e5fc 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: #0d3b66;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Floating background clouds */
+  .cloud {
+    position: fixed;
+    font-size: 3rem;
+    opacity: 0.6;
+    animation: drift 18s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  @keyframes drift {
+    0% { transform: translateX(110vw); }
+    100% { transform: translateX(-15vw); }
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border-radius: 24px;
+    padding: 10px 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .title {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #ff5722;
+  }
+  .header-stats { display: flex; gap: 10px; align-items: center; }
+  .badges-pill {
+    background: #fff8d0;
+    border: 3px solid #f0c419;
+    border-radius: 18px;
+    padding: 4px 14px;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #b78400;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .icon-btn {
+    background: white;
+    border: 3px solid #4fc3f7;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .icon-btn:hover { transform: scale(1.1); }
+  .icon-btn:active { transform: scale(0.92); }
+
+  /* Mission card */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .mission-card {
+    flex: 1;
+    background: white;
+    border-radius: 28px;
+    padding: 20px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+  }
+
+  .character-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+  }
+  .character {
+    font-size: 5.5rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 0.15s;
+    flex-shrink: 0;
+    animation: char-in 0.5s ease-out;
+  }
+  .character:hover { transform: scale(1.08); }
+  .character.speaking { animation: char-bob 0.4s ease-in-out infinite; }
+  .character.celebrate { animation: char-celebrate 0.6s ease-in-out; }
+  @keyframes char-in {
+    0% { transform: translateX(80px) scale(0.4); opacity: 0; }
+    60% { transform: translateX(-8px) scale(1.15); opacity: 1; }
+    100% { transform: translateX(0) scale(1); }
+  }
+  @keyframes char-bob {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-6px) scale(1.05); }
+  }
+  @keyframes char-celebrate {
+    0% { transform: rotate(0) scale(1); }
+    25% { transform: rotate(-15deg) scale(1.2); }
+    50% { transform: rotate(15deg) scale(1.2); }
+    75% { transform: rotate(-10deg) scale(1.15); }
+    100% { transform: rotate(0) scale(1); }
+  }
+
+  .speech-bubble {
+    flex: 1;
+    background: #fff8d0;
+    border: 4px solid #f0c419;
+    border-radius: 22px;
+    padding: 14px 18px;
+    position: relative;
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-align: center;
+  }
+  .speech-bubble::before {
+    content: '';
+    position: absolute;
+    right: -16px;
+    top: 22px;
+    width: 0; height: 0;
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+    border-left: 16px solid #f0c419;
+  }
+  .speech-bubble::after {
+    content: '';
+    position: absolute;
+    right: -10px;
+    top: 24px;
+    width: 0; height: 0;
+    border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent;
+    border-left: 12px solid #fff8d0;
+  }
+  .speak-again-btn {
+    background: white;
+    border: 2px solid #f0c419;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 6px;
+    transition: transform 0.15s;
+    vertical-align: middle;
+  }
+  .speak-again-btn:hover { transform: rotate(-25deg) scale(1.15); background: #fff8d0; }
+
+  /* Items area: count + addition */
+  .items-area {
+    width: 100%;
+    min-height: 120px;
+    background: linear-gradient(180deg, #e3f2fd, #ffffff);
+    border: 3px dashed #4fc3f7;
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px 14px;
+  }
+  .item {
+    font-size: 3.5rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 0.15s;
+    position: relative;
+    padding: 4px;
+  }
+  .item:hover { transform: scale(1.12); }
+  .item.counted {
+    animation: item-pop 0.35s ease-out;
+  }
+  .item.counted::after {
+    content: attr(data-num);
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #ff5722;
+    color: white;
+    font-family: 'Heebo', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+    animation: badge-pop 0.4s ease-out;
+  }
+  @keyframes item-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.35) rotate(-10deg); }
+    100% { transform: scale(1); }
+  }
+  @keyframes badge-pop {
+    0% { transform: scale(0) rotate(-30deg); }
+    60% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
+  .plus-sign-big {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #ff5722;
+    padding: 0 8px;
+  }
+  .group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 14px;
+    padding: 8px 12px;
+    min-width: 100px;
+  }
+
+  /* Recognition cards (for number recognition mode) */
+  .recog-target {
+    font-size: 6rem;
+    font-weight: 900;
+    color: #ff5722;
+    background: white;
+    border: 4px solid #ff5722;
+    border-radius: 24px;
+    padding: 8px 30px;
+    line-height: 1;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  }
+  .recog-options {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .recog-box {
+    background: white;
+    border: 4px solid #4fc3f7;
+    border-radius: 20px;
+    width: 88px;
+    height: 88px;
+    font-size: 3rem;
+    font-weight: 900;
+    color: #0d3b66;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.2s, border-color 0.2s;
+    box-shadow: 0 5px 0 #4fc3f7, 0 8px 14px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .recog-box:hover { transform: translateY(-3px); }
+  .recog-box:active { transform: translateY(3px); box-shadow: 0 2px 0 #4fc3f7; }
+  .recog-box.correct {
+    background: #c8f7d0;
+    border-color: #38d9a9;
+    color: #0b6b4b;
+    animation: pulse-correct 0.5s ease-out;
+  }
+  .recog-box.wrong { animation: shake 0.4s; }
+
+  /* Answer buttons (count + add) */
+  .answers {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .answer-btn {
+    flex: 1;
+    min-width: 90px;
+    max-width: 160px;
+    background: white;
+    border: 4px solid #ff5722;
+    color: #ff5722;
+    padding: 18px 8px;
+    font-size: 2.5rem;
+    font-weight: 900;
+    border-radius: 22px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.15s, background 0.2s;
+    box-shadow: 0 5px 0 #ff5722, 0 8px 14px rgba(0,0,0,0.1);
+  }
+  .answer-btn:hover { transform: translateY(-3px); }
+  .answer-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #ff5722; }
+  .answer-btn.correct {
+    background: #c8f7d0;
+    border-color: #38d9a9;
+    color: #0b6b4b;
+    animation: pulse-correct 0.5s ease-out;
+  }
+  .answer-btn.wrong { animation: shake 0.4s; }
+  .answer-btn.disabled { pointer-events: none; opacity: 0.55; }
+  @keyframes pulse-correct {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.18); }
+    100% { transform: scale(1); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-7px); }
+    75% { transform: translateX(7px); }
+  }
+
+  /* Progress dots */
+  .progress-dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 14px;
+  }
+  .dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    border: 2px solid white;
+    transition: background 0.3s, transform 0.3s;
+  }
+  .dot.done {
+    background: #ffeb3b;
+    transform: scale(1.2);
+    box-shadow: 0 0 8px rgba(255,235,59,0.6);
+  }
+
+  /* Celebration overlay (between sessions) */
+  .celebration-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(13,59,102,0.75);
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .celebration-overlay.active { display: flex; }
+  .celebration-card {
+    background: white;
+    border-radius: 28px;
+    padding: 30px 24px;
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    animation: celeb-in 0.5s ease-out;
+  }
+  @keyframes celeb-in {
+    0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+    60% { transform: scale(1.08) rotate(3deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0); }
+  }
+  .celebration-card .celeb-emoji {
+    font-size: 5rem;
+    line-height: 1;
+    margin-bottom: 14px;
+  }
+  .celebration-card h2 {
+    font-size: 2rem;
+    color: #ff5722;
+    margin-bottom: 10px;
+  }
+  .celebration-card p {
+    font-size: 1.2rem;
+    color: #0d3b66;
+    margin-bottom: 18px;
+  }
+  .big-btn {
+    background: linear-gradient(135deg, #ff9800, #ff5722);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    font-size: 1.4rem;
+    font-weight: 900;
+    border-radius: 40px;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 5px 0 #c44545, 0 8px 14px rgba(0,0,0,0.15);
+    transition: transform 0.1s;
+  }
+  .big-btn:hover { transform: translateY(-2px); }
+  .big-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #c44545; }
+
+  /* Confetti */
+  .confetti {
+    position: fixed;
+    width: 10px;
+    height: 14px;
+    z-index: 60;
+    pointer-events: none;
+    animation: confetti-fall 2.5s linear forwards;
+  }
+  @keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(0); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .title { font-size: 1.1rem; }
+    .character { font-size: 4.5rem; }
+    .speech-bubble { font-size: 1.1rem; padding: 12px 14px; }
+    .item { font-size: 2.8rem; }
+    .item.counted::after { width: 26px; height: 26px; font-size: 0.95rem; }
+    .answer-btn { font-size: 2rem; padding: 16px 8px; }
+    .recog-target { font-size: 4.5rem; padding: 4px 22px; }
+    .recog-box { width: 72px; height: 72px; font-size: 2.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cloud" style="top: 8%; animation-delay: 0s;">☁️</div>
+<div class="cloud" style="top: 30%; animation-delay: -6s;">☁️</div>
+<div class="cloud" style="top: 55%; animation-delay: -12s;">☁️</div>
+<div class="cloud" style="top: 78%; animation-delay: -3s;">☁️</div>
+
+<div id="app">
+  <header>
+    <div class="title">🚓 המשימות של אלון 🦸</div>
+    <div class="header-stats">
+      <div class="badges-pill"><span>🏆</span><span id="badgeCount">0</span></div>
+      <button class="icon-btn" id="soundBtn" title="סאונד">🔊</button>
+      <button class="icon-btn" id="syncBtn" title="קוד סנכרון">🔑</button>
+      <button class="icon-btn" id="resetBtn" title="התחלה מחדש">🔄</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="mission-card">
+      <div class="character-row">
+        <div class="character" id="character" title="לחץ לשמוע שוב">🐶</div>
+        <div class="speech-bubble">
+          <span id="questionText">בואו נשחק!</span>
+          <button class="speak-again-btn" id="speakAgainBtn" title="שוב">🔁</button>
+        </div>
+      </div>
+      <div class="items-area" id="itemsArea"></div>
+      <div class="answers" id="answersArea"></div>
+    </div>
+    <div class="progress-dots" id="progressDots"></div>
+  </main>
+</div>
+
+<!-- Session complete celebration -->
+<div class="celebration-overlay" id="celebrationOverlay">
+  <div class="celebration-card">
+    <div class="celeb-emoji" id="celebEmoji">🎉</div>
+    <h2 id="celebTitle">כל הכבוד אלון!</h2>
+    <p id="celebText">סיימת את כל המשימות!</p>
+    <button class="big-btn" onclick="continueAfterCelebration()">משימות חדשות 🚀</button>
+  </div>
+</div>
+
+<script>
+  // ============ STATE ============
+  const STORAGE_KEY = 'alon-missions:save:v1';
+  const SESSION_LENGTH = 8;
+
+  const state = {
+    badges: 0,
+    soundOn: true,
+    // adaptive difficulty per question type (max value used)
+    countMax: 3,
+    addMax: 3,
+    recogMax: 5,
+    // per-type streaks
+    countStreak: 0,    countWrongStreak: 0,
+    addStreak: 0,      addWrongStreak: 0,
+    recogStreak: 0,    recogWrongStreak: 0,
+    // cloud sync
+    syncCode: null,         // 6-char "XXX-XXX", generated on first launch
+    lastUpdatedAt: 0,       // server timestamp of last known cloud version
+    // current session
+    sessionDots: 0,
+    currentQuestion: null,
+    lastQuestionKey: null,
+    answerLocked: false,
+  };
+
+  // Sync code alphabet — no visually confusing chars (0/O, 1/I/L)
+  const SYNC_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  function generateSyncCode() {
+    const part = (n) => {
+      let s = '';
+      for (let i = 0; i < n; i++) s += SYNC_ALPHABET[Math.floor(Math.random() * SYNC_ALPHABET.length)];
+      return s;
+    };
+    return part(3) + '-' + part(3);
+  }
+
+  // ============ CONTENT ============
+  const CHARACTERS = [
+    { emoji: '🚗',   namePlural: 'מכוניות',    voiceName: 'מכוניות' },
+    { emoji: '🚓',   namePlural: 'ניידות',     voiceName: 'ניידות משטרה' },
+    { emoji: '🚒',   namePlural: 'מכבי אש',    voiceName: 'משאיות כיבוי' },
+    { emoji: '🚛',   namePlural: 'משאיות',     voiceName: 'משאיות' },
+    { emoji: '🚕',   namePlural: 'מוניות',     voiceName: 'מוניות' },
+    { emoji: '🚌',   namePlural: 'אוטובוסים',  voiceName: 'אוטובוסים' },
+    { emoji: '🚑',   namePlural: 'אמבולנסים',  voiceName: 'אמבולנסים' },
+    { emoji: '🚀',   namePlural: 'חלליות',     voiceName: 'חלליות' },
+    { emoji: '🐶',   namePlural: 'כלבים',      voiceName: 'כלבים' },
+    { emoji: '🐕',   namePlural: 'גורים',      voiceName: 'גורים' },
+    { emoji: '🦸‍♂️', namePlural: 'גיבורים',    voiceName: 'גיבורים' },
+    { emoji: '🦸‍♀️', namePlural: 'גיבורות',    voiceName: 'גיבורות' },
+    { emoji: '⭐',    namePlural: 'כוכבים',     voiceName: 'כוכבים' },
+    { emoji: '💎',   namePlural: 'יהלומים',    voiceName: 'יהלומים' },
+  ];
+
+  const HOST_CHARACTERS = [
+    '🐶','🐕','🦸‍♂️','🦸‍♀️','🚓','🚒','🦊','🐯','🐻','🐰'
+  ];
+
+  // Hebrew feminine number words (matches collective counting)
+  const NUMBER_WORDS_F = ['אפס','אחת','שתיים','שלוש','ארבע','חמש','שש','שבע','שמונה','תשע','עשר'];
+
+  const CELEBRATION_LINES = [
+    'כל הכבוד אלון!','מצוין!','ואו, אלוף!','איזה גיבור!',
+    'יופי!','בדיוק נכון!','כל הכבוד!','נהדר!'
+  ];
+
+  const ENCOURAGE_LINES = [
+    'כמעט! עוד פעם.','ננסה שוב.','אופס, ננסה עוד פעם.'
+  ];
+
+  // ============ UTILS ============
+  function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  function choice(arr) { return arr[randInt(0, arr.length - 1)]; }
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+  }
+
+  // ============ STORAGE ============
+  function loadSave() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      state.badges        = data.badges        || 0;
+      state.soundOn       = data.soundOn !== false;
+      state.countMax      = data.countMax      || 3;
+      state.addMax        = data.addMax        || 3;
+      state.recogMax      = data.recogMax      || 5;
+      state.syncCode      = data.syncCode      || null;
+      state.lastUpdatedAt = data.lastUpdatedAt || 0;
+    } catch (e) { /* ignore */ }
+  }
+  function writeLocalSave() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        badges:        state.badges,
+        soundOn:       state.soundOn,
+        countMax:      state.countMax,
+        addMax:        state.addMax,
+        recogMax:      state.recogMax,
+        syncCode:      state.syncCode,
+        lastUpdatedAt: state.lastUpdatedAt,
+      }));
+    } catch (e) {}
+  }
+  function saveSave() {
+    writeLocalSave();
+    schedulePush(); // best-effort cloud push, fails silently if offline
+  }
+
+  // ============ CLOUD SYNC (Netlify Functions + Blobs) ============
+  const CLOUD_API = '/api/profile';
+  const PUSH_DEBOUNCE_MS = 2000;
+  let pushTimer = null;
+
+  async function pushState() {
+    if (!state.syncCode) return;
+    const r = await fetch(CLOUD_API + '/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        syncCode: state.syncCode,
+        profile: {
+          badges:   state.badges,
+          countMax: state.countMax,
+          addMax:   state.addMax,
+          recogMax: state.recogMax,
+          soundOn:  state.soundOn,
+        },
+      }),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    if (data.updatedAt) {
+      state.lastUpdatedAt = data.updatedAt;
+      writeLocalSave(); // record the new server timestamp locally
+    }
+    return data;
+  }
+
+  async function pullState(code) {
+    const r = await fetch(CLOUD_API + '/load?code=' + encodeURIComponent(code));
+    if (r.status === 404) return null;
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    return data.profile || null;
+  }
+
+  function schedulePush() {
+    if (!state.syncCode) return;
+    if (pushTimer) clearTimeout(pushTimer);
+    pushTimer = setTimeout(() => {
+      pushTimer = null;
+      pushState().catch(e => console.warn('[alon] cloud push failed:', e.message));
+    }, PUSH_DEBOUNCE_MS);
+  }
+
+  // Apply cloud data to state without re-pushing back. Caller decides UI refresh.
+  function applyCloudState(cloud) {
+    state.badges        = cloud.badges        ?? state.badges;
+    state.countMax      = cloud.countMax      ?? state.countMax;
+    state.addMax        = cloud.addMax        ?? state.addMax;
+    state.recogMax      = cloud.recogMax      ?? state.recogMax;
+    state.soundOn       = cloud.soundOn !== false;
+    state.lastUpdatedAt = cloud.updatedAt     || state.lastUpdatedAt;
+    writeLocalSave();
+    updateBadgeCount();
+    document.getElementById('soundBtn').textContent = state.soundOn ? '🔊' : '🔇';
+  }
+
+  // Background sync on boot — fetches latest if cloud has newer updatedAt.
+  async function refreshFromCloud() {
+    if (!state.syncCode) return;
+    try {
+      const cloud = await pullState(state.syncCode);
+      if (!cloud) return;
+      if ((cloud.updatedAt || 0) > (state.lastUpdatedAt || 0)) {
+        console.log('[alon] cloud newer, applying');
+        applyCloudState(cloud);
+      }
+    } catch (e) {
+      console.warn('[alon] cloud pull failed:', e.message);
+    }
+  }
+
+  // Parent UI: show current code & allow switching to another code (cross-device).
+  async function showSyncSettings() {
+    const code = state.syncCode || '—';
+    // prompt() so parent can copy text + optionally replace
+    const answer = prompt(
+      `הקוד של אלון:\n\n${code}\n\n` +
+      `🟢 שמרי את הקוד כדי להמשיך לשחק במכשיר אחר.\n` +
+      `🔄 כדי להחליף לקוד אחר (להעביר משחק מכאן למשחק במקום אחר), הקלידי אותו כאן ולחצי OK.\n` +
+      `❌ אחרת — לחצי Cancel או OK בלי לשנות.`,
+      code
+    );
+    if (answer === null) return;
+    const cleaned = answer.trim().toUpperCase().replace(/[^A-Z2-9-]/g, '');
+    if (!cleaned || cleaned === code) return;
+    let formatted = cleaned;
+    if (!formatted.includes('-') && formatted.length === 6) formatted = formatted.slice(0, 3) + '-' + formatted.slice(3);
+    if (!/^[A-Z2-9]{3}-[A-Z2-9]{3}$/.test(formatted)) {
+      alert('❌ הקוד לא תקין. צורה נדרשת: XXX-XXX');
+      return;
+    }
+    // Try to import
+    try {
+      const cloud = await pullState(formatted);
+      if (!cloud) {
+        alert('❌ הקוד "' + formatted + '" לא נמצא בענן.');
+        return;
+      }
+      state.syncCode = formatted;
+      applyCloudState(cloud);
+      alert('✅ הצלחה! יש לך ' + state.badges + ' מדליות 🏆');
+    } catch (e) {
+      alert('❌ שגיאה: ' + (e.message || 'נסי שוב'));
+    }
+  }
+
+  // ============ AUDIO ============
+  let audioCtx = null;
+  function getCtx() {
+    if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+    return audioCtx;
+  }
+  function playTone(freq, duration = 0.18, type = 'sine', vol = 0.1) {
+    if (!state.soundOn) return;
+    const ctx = getCtx();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + duration);
+  }
+  function playCorrect() {
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((n, i) => setTimeout(() => playTone(n, 0.15), i * 90));
+  }
+  function playWrong() {
+    playTone(380, 0.14, 'triangle', 0.08);
+    setTimeout(() => playTone(280, 0.18, 'triangle', 0.08), 130);
+  }
+  function playTap() { playTone(880, 0.08, 'sine', 0.07); }
+
+  // ============ SPEECH (TTS) ============
+  let hebrewVoice = null;
+  let voicesPromise = null;
+
+  function isHebrewVoice(v) {
+    if (!v) return false;
+    const lang = (v.lang || '').toLowerCase();
+    if (lang === 'he-il' || lang === 'he') return true;
+    if (lang.startsWith('he-') || lang.startsWith('he_')) return true;
+    if (lang === 'iw-il' || lang === 'iw') return true;
+    if (lang.startsWith('iw-') || lang.startsWith('iw_')) return true;
+    if (/carmit|hebrew|עברית/i.test(v.name || '')) return true;
+    return false;
+  }
+  function detectHebrewVoice() {
+    if (!window.speechSynthesis) return null;
+    const voices = speechSynthesis.getVoices();
+    const hebrew = voices.filter(isHebrewVoice);
+    if (hebrew.length === 0) return null;
+    return hebrew.find(v => v.localService) || hebrew[0];
+  }
+  function initVoices() {
+    if (!window.speechSynthesis) return;
+    voicesPromise = new Promise((resolve) => {
+      let resolved = false;
+      const tryDetect = () => {
+        if (resolved) return;
+        const v = detectHebrewVoice();
+        if (v || speechSynthesis.getVoices().length > 0) {
+          hebrewVoice = v;
+          resolved = true;
+          console.log('[alon] Hebrew voice:', v ? `${v.name} (${v.lang})` : 'NOT FOUND. TTS disabled.');
+          resolve(v);
+        }
+      };
+      tryDetect();
+      if (!resolved) {
+        speechSynthesis.addEventListener('voiceschanged', tryDetect);
+        setTimeout(() => { if (!resolved) { hebrewVoice = detectHebrewVoice(); resolved = true; resolve(hebrewVoice); } }, 2000);
+      }
+    });
+  }
+  initVoices();
+
+  function speak(text, opts = {}) {
+    if (!state.soundOn) return;
+    if (!window.speechSynthesis) return;
+    (voicesPromise || Promise.resolve()).then(() => {
+      if (!hebrewVoice) return; // skip if no Hebrew voice rather than mispronounce
+      speechSynthesis.cancel();
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.voice = hebrewVoice;
+      utt.lang  = hebrewVoice.lang || 'he-IL';
+      utt.pitch = opts.pitch ?? 1.2;   // slightly higher = more childlike/friendly
+      utt.rate  = opts.rate  ?? 0.95;
+      utt.volume = 1.0;
+      const char = document.getElementById('character');
+      utt.onstart = () => char && char.classList.add('speaking');
+      utt.onend   = () => char && char.classList.remove('speaking');
+      utt.onerror = () => char && char.classList.remove('speaking');
+      setTimeout(() => { try { speechSynthesis.speak(utt); } catch (e) {} }, 60);
+    });
+  }
+  function speakNumber(n) {
+    if (n >= 0 && n <= 10) speak(NUMBER_WORDS_F[n], { pitch: 1.5, rate: 1.0 });
+    else speak(String(n));
+  }
+
+  // ============ QUESTION GENERATION ============
+  function pickQuestionType() {
+    // Weighted: 60% count, 30% recog, 10% add (start; shifts up as add difficulty rises)
+    const r = Math.random();
+    // Always-allow add only if we've shown some count first (sessionDots > 0 helps)
+    if (state.sessionDots < 2) return Math.random() < 0.7 ? 'count' : 'recog';
+    if (r < 0.55) return 'count';
+    if (r < 0.85) return 'recog';
+    return 'add';
+  }
+
+  function genCountQuestion() {
+    const max = Math.min(state.countMax, 10);
+    let n;
+    do { n = randInt(1, max); } while (`count:${n}` === state.lastQuestionKey && max > 1);
+    state.lastQuestionKey = `count:${n}`;
+    const ch = choice(CHARACTERS);
+    return {
+      type: 'count',
+      answer: n,
+      character: ch,
+      questionText: `כמה ${ch.namePlural} יש?`,
+      speech: `כמה ${ch.voiceName} יש?`,
+      options: genNumberOptions(n, 0, Math.max(max, n) + 1),
+    };
+  }
+
+  function genRecogQuestion() {
+    const max = Math.min(state.recogMax, 10);
+    let target;
+    do { target = randInt(0, max); } while (`recog:${target}` === state.lastQuestionKey && max > 1);
+    state.lastQuestionKey = `recog:${target}`;
+    const word = NUMBER_WORDS_F[target] || String(target);
+    return {
+      type: 'recog',
+      answer: target,
+      questionText: `איפה המספר ${target}?`,
+      speech: `איפה המספר ${word}?`,
+      options: genNumberOptions(target, 0, Math.min(10, max + 2)),
+    };
+  }
+
+  function genAddQuestion() {
+    const max = Math.min(state.addMax, 10);
+    // a + b ≤ max, both ≥ 0, at least one ≥ 1
+    let a, b;
+    do {
+      a = randInt(0, Math.min(max - 1, 5));
+      b = randInt(1, Math.max(1, max - a));
+    } while ((a + b > max) || `add:${a}+${b}` === state.lastQuestionKey);
+    state.lastQuestionKey = `add:${a}+${b}`;
+    const ch = choice(CHARACTERS);
+    return {
+      type: 'add',
+      a, b,
+      answer: a + b,
+      character: ch,
+      questionText: `${a} ועוד ${b} ${ch.namePlural}?`,
+      speech: `${NUMBER_WORDS_F[a]} ${ch.voiceName}, ועוד ${NUMBER_WORDS_F[b]}, כמה יחד?`,
+      options: genNumberOptions(a + b, 0, Math.min(10, max + 1)),
+    };
+  }
+
+  function genNumberOptions(correct, minVal, maxVal) {
+    const opts = new Set([correct]);
+    // 2 plausible neighbors
+    const candidates = [correct - 1, correct + 1, correct - 2, correct + 2, correct + 3, correct - 3];
+    for (const c of shuffle(candidates)) {
+      if (c >= minVal && c <= maxVal && c !== correct) opts.add(c);
+      if (opts.size >= 3) break;
+    }
+    // pad with random if needed
+    while (opts.size < 3) {
+      const r = randInt(minVal, maxVal);
+      if (r !== correct) opts.add(r);
+    }
+    return shuffle(Array.from(opts));
+  }
+
+  function generateQuestion() {
+    const type = pickQuestionType();
+    if (type === 'count') return genCountQuestion();
+    if (type === 'recog') return genRecogQuestion();
+    return genAddQuestion();
+  }
+
+  // ============ RENDER ============
+  function renderQuestion() {
+    const q = state.currentQuestion;
+    state.answerLocked = false;
+
+    // Pick a host character to appear in the avatar slot
+    document.getElementById('character').textContent = q.character?.emoji || choice(HOST_CHARACTERS);
+    document.getElementById('questionText').textContent = q.questionText;
+
+    const itemsArea = document.getElementById('itemsArea');
+    itemsArea.innerHTML = '';
+    const answersArea = document.getElementById('answersArea');
+    answersArea.innerHTML = '';
+
+    if (q.type === 'count') {
+      // Show q.answer items of q.character
+      itemsArea.style.display = 'flex';
+      itemsArea.innerHTML = renderItems(q.character.emoji, q.answer, 'count-area');
+      attachCountTaps(itemsArea);
+      renderNumberButtons(answersArea, q.options, q.answer);
+    } else if (q.type === 'recog') {
+      // Show the target digit big, options below
+      itemsArea.innerHTML = `<div class="recog-target">${q.answer}</div>`;
+      // Options as recog-box (digit boxes)
+      const wrap = document.createElement('div');
+      wrap.className = 'recog-options';
+      q.options.forEach(opt => {
+        const box = document.createElement('button');
+        box.className = 'recog-box';
+        box.textContent = opt;
+        box.addEventListener('click', () => handleAnswer(opt, box));
+        wrap.appendChild(box);
+      });
+      answersArea.appendChild(wrap);
+    } else if (q.type === 'add') {
+      // Show a + b visually
+      const left  = `<div class="group">${repeatHtml(`<div class="item">${q.character.emoji}</div>`, q.a) || '&nbsp;'}</div>`;
+      const right = `<div class="group">${repeatHtml(`<div class="item">${q.character.emoji}</div>`, q.b) || '&nbsp;'}</div>`;
+      itemsArea.innerHTML = `${left}<div class="plus-sign-big">+</div>${right}`;
+      attachCountTaps(itemsArea);
+      renderNumberButtons(answersArea, q.options, q.answer);
+    }
+
+    speak(q.speech);
+  }
+
+  function renderItems(emoji, count, area) {
+    let s = '';
+    for (let i = 0; i < count; i++) s += `<div class="item">${emoji}</div>`;
+    return s;
+  }
+  function repeatHtml(html, n) { return n > 0 ? html.repeat(n) : ''; }
+
+  function renderNumberButtons(container, options, correct) {
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'answer-btn';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => handleAnswer(opt, btn));
+      container.appendChild(btn);
+    });
+  }
+
+  // Tap an item to count up. State only used as a counting AID.
+  let tapCounter = 0;
+  function attachCountTaps(area) {
+    tapCounter = 0;
+    area.querySelectorAll('.item').forEach(el => {
+      el.addEventListener('click', () => {
+        if (el.classList.contains('counted')) {
+          // Replay the number for that item
+          const n = parseInt(el.dataset.num, 10);
+          speakNumber(n);
+          return;
+        }
+        tapCounter++;
+        el.dataset.num = String(tapCounter);
+        el.classList.add('counted');
+        playTap();
+        speakNumber(tapCounter);
+      });
+    });
+  }
+
+  // ============ ANSWER ============
+  function handleAnswer(value, btn) {
+    if (state.answerLocked) return;
+    const q = state.currentQuestion;
+    if (value === q.answer) {
+      state.answerLocked = true;
+      btn.classList.add('correct');
+      onCorrect();
+    } else {
+      btn.classList.add('wrong');
+      btn.classList.add('disabled');
+      onWrong();
+    }
+  }
+
+  function onCorrect() {
+    playCorrect();
+    confettiBurst(18);
+    const char = document.getElementById('character');
+    char.classList.remove('celebrate');
+    void char.offsetWidth;
+    char.classList.add('celebrate');
+    speak(choice(CELEBRATION_LINES), { pitch: 1.4, rate: 1.05 });
+
+    // Bump per-type streaks & adaptive difficulty
+    const q = state.currentQuestion;
+    if (q.type === 'count') {
+      state.countStreak++;
+      state.countWrongStreak = 0;
+      if (state.countStreak >= 3 && state.countMax < 10) {
+        state.countMax++;
+        state.countStreak = 0;
+      }
+    } else if (q.type === 'add') {
+      state.addStreak++;
+      state.addWrongStreak = 0;
+      if (state.addStreak >= 3 && state.addMax < 10) {
+        state.addMax++;
+        state.addStreak = 0;
+      }
+    } else if (q.type === 'recog') {
+      state.recogStreak++;
+      state.recogWrongStreak = 0;
+      if (state.recogStreak >= 3 && state.recogMax < 10) {
+        state.recogMax++;
+        state.recogStreak = 0;
+      }
+    }
+
+    // Progress + badges
+    state.sessionDots++;
+    state.badges++;
+    updateBadgeCount();
+    updateProgressDots();
+    saveSave();
+
+    if (state.sessionDots >= SESSION_LENGTH) {
+      setTimeout(showSessionCelebration, 1100);
+    } else {
+      setTimeout(nextQuestion, 1100);
+    }
+  }
+
+  function onWrong() {
+    playWrong();
+    const q = state.currentQuestion;
+    if (q.type === 'count') {
+      state.countStreak = 0;
+      state.countWrongStreak++;
+      if (state.countWrongStreak >= 2 && state.countMax > 2) {
+        state.countMax--;
+        state.countWrongStreak = 0;
+      }
+    } else if (q.type === 'add') {
+      state.addStreak = 0;
+      state.addWrongStreak++;
+      if (state.addWrongStreak >= 2 && state.addMax > 2) {
+        state.addMax--;
+        state.addWrongStreak = 0;
+      }
+    } else if (q.type === 'recog') {
+      state.recogStreak = 0;
+      state.recogWrongStreak++;
+      if (state.recogWrongStreak >= 2 && state.recogMax > 2) {
+        state.recogMax--;
+        state.recogWrongStreak = 0;
+      }
+    }
+    saveSave();
+    // Gentle encouragement; let him try the same question again
+    speak(choice(ENCOURAGE_LINES), { pitch: 1.1, rate: 0.95 });
+  }
+
+  function nextQuestion() {
+    state.currentQuestion = generateQuestion();
+    renderQuestion();
+  }
+
+  // ============ HUD ============
+  function updateBadgeCount() {
+    document.getElementById('badgeCount').textContent = state.badges;
+  }
+  function updateProgressDots() {
+    const dotsEl = document.getElementById('progressDots');
+    dotsEl.innerHTML = '';
+    for (let i = 0; i < SESSION_LENGTH; i++) {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i < state.sessionDots ? ' done' : '');
+      dotsEl.appendChild(d);
+    }
+  }
+
+  // ============ CELEBRATION ============
+  function confettiBurst(count = 50) {
+    const colors = ['#ff5722','#ffeb3b','#4fc3f7','#38d9a9','#ff6b9d','#a29bfe'];
+    for (let i = 0; i < count; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
+      c.style.animationDelay = Math.random() * 0.3 + 's';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 3500);
+    }
+  }
+  function showSessionCelebration() {
+    document.getElementById('celebEmoji').textContent = choice(['🎉','🏆','⭐','🚀','🎊']);
+    document.getElementById('celebTitle').textContent = `כל הכבוד אלון!`;
+    document.getElementById('celebText').textContent =
+      `סיימת ${SESSION_LENGTH} משימות! יש לך ${state.badges} מדליות 🏆`;
+    document.getElementById('celebrationOverlay').classList.add('active');
+    confettiBurst(80);
+    speak(`כל הכבוד אלון! סיימת את כל המשימות!`, { pitch: 1.3, rate: 1.0 });
+  }
+  function continueAfterCelebration() {
+    document.getElementById('celebrationOverlay').classList.remove('active');
+    state.sessionDots = 0;
+    updateProgressDots();
+    nextQuestion();
+  }
+  window.continueAfterCelebration = continueAfterCelebration;
+
+  // ============ INIT ============
+  document.getElementById('soundBtn').addEventListener('click', () => {
+    state.soundOn = !state.soundOn;
+    document.getElementById('soundBtn').textContent = state.soundOn ? '🔊' : '🔇';
+    saveSave();
+    if (!state.soundOn && window.speechSynthesis) speechSynthesis.cancel();
+    if (state.soundOn) playTap();
+  });
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    if (confirm('להתחיל את הסשן מהתחלה? המדליות נשמרות.')) {
+      state.sessionDots = 0;
+      updateProgressDots();
+      nextQuestion();
+    }
+  });
+  document.getElementById('syncBtn').addEventListener('click', showSyncSettings);
+  document.getElementById('character').addEventListener('click', () => {
+    if (state.currentQuestion) speak(state.currentQuestion.speech);
+  });
+  document.getElementById('speakAgainBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (state.currentQuestion) speak(state.currentQuestion.speech);
+  });
+
+  loadSave();
+  // Generate a sync code on the very first launch (so the parent can copy it later)
+  if (!state.syncCode) {
+    state.syncCode = generateSyncCode();
+    writeLocalSave();
+    console.log('[alon] generated new sync code:', state.syncCode);
+    // Push initial state so the code is claimed in the cloud
+    pushState().catch(e => console.warn('[alon] initial push failed:', e.message));
+  } else {
+    // Returning user: try to refresh from cloud (silent, non-blocking)
+    refreshFromCloud();
+  }
+  document.getElementById('soundBtn').textContent = state.soundOn ? '🔊' : '🔇';
+  updateBadgeCount();
+  updateProgressDots();
+  nextQuestion();
+</script>
+
+</body>
+</html>
