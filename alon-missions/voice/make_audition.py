@@ -18,6 +18,10 @@ OUT = os.path.join(HERE, 'audition.html')
 
 # Clips the listener already flagged as wrong, called out at the top of the page.
 FLAGGED = {
+    'let_bet':   'עלול להישמע "בַּיִת"',
+    'let_kof':   'עלול להישמע "קוף" החיה',
+    'let_ayin':  'עלול להישמע "עַיִן" האיבר',
+    'let_dalet': 'עלול להישמע "דֶלֶת"',
     'n2': 'נשמע כמו שלוש הברות',
 }
 
@@ -27,9 +31,14 @@ SENTENCES = [
     ('חיבור',   ['n3', 'ch_cars', 'q_plus', 'n2', 'q_together']),
     ('חיסור (רבים)', ['q_were', 'n5', 'ch_frogs', 'q_wentaway', 'n2', 'q_howmany_left']),
     ('חיסור (יחיד)', ['q_were', 'n4', 'ch_cats', 'q_wentaway_one', 'n1', 'q_howmany_left']),
+    ('אותיות', ['q_where_letter', 'let_bet']),
+    ('קריאה',  ['q_where_written', 'w_pil']),
 ]
 
 GROUPS = [
+    ('אותיות', lambda i: i.startswith('let_')),
+    ('מילים לקריאה', lambda i: i.startswith('w_')),
+    ('מסך הבחירה', lambda i: i.startswith('cat_') or i == 'pick_what'),
     ('מספרים', lambda i: i.startswith('n') and i[1:].isdigit()),
     ('מחברים', lambda i: i.startswith('q_')),
     ('שבחים ועידוד', lambda i: i.startswith('cel') or i.startswith('enc') or i == 'session_done'),

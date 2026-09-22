@@ -17,6 +17,11 @@
 # The voice pack is rebuilt by hand, never per-deploy — cache it hard so a
 # phone downloads the ~500 KB once.
 [[headers]]
+  for = "/voice/pack.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
   for = "/voice/clips/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"

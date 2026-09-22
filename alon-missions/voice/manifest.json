@@ -244,6 +244,261 @@
     "duration": 0.779,
     "bytes": 9400
   },
+  "q_where_letter": {
+    "text": "איפה האות",
+    "duration": 0.633,
+    "bytes": 8318
+  },
+  "q_where_written": {
+    "text": "איפה כתוב",
+    "duration": 0.715,
+    "bytes": 8900
+  },
+  "let_alef": {
+    "text": "אָלֶף",
+    "duration": 0.48,
+    "bytes": 7390
+  },
+  "let_bet": {
+    "text": "בֵּית",
+    "duration": 0.363,
+    "bytes": 7090
+  },
+  "let_gimel": {
+    "text": "גִּימֶל",
+    "duration": 0.5,
+    "bytes": 7596
+  },
+  "let_dalet": {
+    "text": "דָּלֶת",
+    "duration": 0.509,
+    "bytes": 8092
+  },
+  "let_hey": {
+    "text": "הֵא",
+    "duration": 0.302,
+    "bytes": 6300
+  },
+  "let_vav": {
+    "text": "וָו",
+    "duration": 0.296,
+    "bytes": 6383
+  },
+  "let_zayin": {
+    "text": "זַיִן",
+    "duration": 0.54,
+    "bytes": 7827
+  },
+  "let_chet": {
+    "text": "חֵית",
+    "duration": 0.424,
+    "bytes": 7142
+  },
+  "let_tet": {
+    "text": "טֵית",
+    "duration": 0.331,
+    "bytes": 6463
+  },
+  "let_yod": {
+    "text": "יוֹד",
+    "duration": 0.409,
+    "bytes": 7041
+  },
+  "let_kaf": {
+    "text": "כָּף",
+    "duration": 0.383,
+    "bytes": 6774
+  },
+  "let_lamed": {
+    "text": "לָמֶד",
+    "duration": 0.453,
+    "bytes": 7274
+  },
+  "let_mem": {
+    "text": "מֵם",
+    "duration": 0.344,
+    "bytes": 6416
+  },
+  "let_nun": {
+    "text": "נוּן",
+    "duration": 0.353,
+    "bytes": 6545
+  },
+  "let_samech": {
+    "text": "סָמֶךְ",
+    "duration": 0.574,
+    "bytes": 7950
+  },
+  "let_ayin": {
+    "text": "עַיִן",
+    "duration": 0.458,
+    "bytes": 6996
+  },
+  "let_pey": {
+    "text": "פֵּא",
+    "duration": 0.27,
+    "bytes": 6059
+  },
+  "let_tzadi": {
+    "text": "צָדִי",
+    "duration": 0.391,
+    "bytes": 6934
+  },
+  "let_kof": {
+    "text": "קוֹף",
+    "duration": 0.397,
+    "bytes": 7115
+  },
+  "let_resh": {
+    "text": "רֵישׁ",
+    "duration": 0.448,
+    "bytes": 7245
+  },
+  "let_shin": {
+    "text": "שִׁין",
+    "duration": 0.42,
+    "bytes": 6886
+  },
+  "let_tav": {
+    "text": "תָּו",
+    "duration": 0.319,
+    "bytes": 6307
+  },
+  "w_aba": {
+    "text": "אַבָּא",
+    "duration": 0.429,
+    "bytes": 7088
+  },
+  "w_ima": {
+    "text": "אִמָּא",
+    "duration": 0.383,
+    "bytes": 6660
+  },
+  "w_dov": {
+    "text": "דֹּב",
+    "duration": 0.357,
+    "bytes": 6788
+  },
+  "w_pil": {
+    "text": "פִּיל",
+    "duration": 0.294,
+    "bytes": 5999
+  },
+  "w_kelev": {
+    "text": "כֶּלֶב",
+    "duration": 0.429,
+    "bytes": 6919
+  },
+  "w_chatul": {
+    "text": "חָתוּל",
+    "duration": 0.429,
+    "bytes": 7020
+  },
+  "w_dag": {
+    "text": "דָּג",
+    "duration": 0.375,
+    "bytes": 6994
+  },
+  "w_para": {
+    "text": "פָּרָה",
+    "duration": 0.318,
+    "bytes": 6257
+  },
+  "w_ari": {
+    "text": "אֲרִי",
+    "duration": 0.318,
+    "bytes": 6353
+  },
+  "w_sus": {
+    "text": "סוּס",
+    "duration": 0.491,
+    "bytes": 7789
+  },
+  "w_etz": {
+    "text": "עֵץ",
+    "duration": 0.438,
+    "bytes": 7283
+  },
+  "w_shemesh": {
+    "text": "שֶׁמֶשׁ",
+    "duration": 0.633,
+    "bytes": 8354
+  },
+  "w_bayit": {
+    "text": "בַּיִת",
+    "duration": 0.478,
+    "bytes": 7973
+  },
+  "w_yad": {
+    "text": "יָד",
+    "duration": 0.409,
+    "bytes": 7093
+  },
+  "w_mayim": {
+    "text": "מַיִם",
+    "duration": 0.48,
+    "bytes": 7241
+  },
+  "w_lechem": {
+    "text": "לֶחֶם",
+    "duration": 0.505,
+    "bytes": 7322
+  },
+  "w_kadur": {
+    "text": "כַּדּוּר",
+    "duration": 0.45,
+    "bytes": 7270
+  },
+  "w_oto": {
+    "text": "אוֹטוֹ",
+    "duration": 0.424,
+    "bytes": 7041
+  },
+  "w_sefer": {
+    "text": "סֵפֶר",
+    "duration": 0.567,
+    "bytes": 7926
+  },
+  "w_tapuach": {
+    "text": "תַּפּוּחַ",
+    "duration": 0.644,
+    "bytes": 8421
+  },
+  "cat_count": {
+    "text": "ספירה",
+    "duration": 0.542,
+    "bytes": 7734
+  },
+  "cat_recog": {
+    "text": "מספרים",
+    "duration": 0.588,
+    "bytes": 8415
+  },
+  "cat_add": {
+    "text": "חיבור",
+    "duration": 0.478,
+    "bytes": 7202
+  },
+  "cat_sub": {
+    "text": "חיסור",
+    "duration": 0.532,
+    "bytes": 7603
+  },
+  "cat_letter": {
+    "text": "אותיות",
+    "duration": 0.547,
+    "bytes": 7939
+  },
+  "cat_read": {
+    "text": "קריאה",
+    "duration": 0.406,
+    "bytes": 6776
+  },
+  "cat_mixed": {
+    "text": "הכל מעורבב",
+    "duration": 0.877,
+    "bytes": 9943
+  },
   "cel0": {
     "text": "כל הכבוד אלון",
     "duration": 0.923,
@@ -298,6 +553,11 @@
     "text": "אופס, ננסה עוד פעם",
     "duration": 1.774,
     "bytes": 15870
+  },
+  "pick_what": {
+    "text": "מה נשחק היום?",
+    "duration": 0.947,
+    "bytes": 10508
   },
   "session_done": {
     "text": "כל הכבוד אלון! סִיַּמְתָּ את כל המשימות",
