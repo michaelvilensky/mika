@@ -250,6 +250,31 @@
     60% { transform: scale(1.3); }
     100% { transform: scale(1); }
   }
+  .item.gone { cursor: default; }
+  .item.gone:hover { transform: none; }
+  .item.gone .glyph {
+    display: inline-block;
+    opacity: 0.3;
+    filter: grayscale(1);
+    animation: item-leave 0.45s ease-out;
+  }
+  .item.gone::after {
+    content: '\2715';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.6rem;
+    font-weight: 900;
+    color: #d32f2f;
+    text-shadow: 0 1px 3px rgba(255,255,255,0.9);
+  }
+  @keyframes item-leave {
+    0%   { opacity: 1; filter: grayscale(0); transform: scale(1); }
+    60%  { opacity: 0.3; filter: grayscale(1); transform: scale(0.82) rotate(-8deg); }
+    100% { opacity: 0.3; filter: grayscale(1); transform: scale(1); }
+  }
   .plus-sign-big {
     font-size: 3rem;
     font-weight: 900;
@@ -517,10 +542,12 @@
     // adaptive difficulty per question type (max value used)
     countMax: 3,
     addMax: 3,
+    subMax: 3,
     recogMax: 5,
     // per-type streaks
     countStreak: 0,    countWrongStreak: 0,
     addStreak: 0,      addWrongStreak: 0,
+    subStreak: 0,      subWrongStreak: 0,
     recogStreak: 0,    recogWrongStreak: 0,
     // cloud sync
     syncCode: null,         // 6-char "XXX-XXX", generated on first launch
@@ -544,41 +571,42 @@
   }
 
   // ============ CONTENT ============
+  // voiceId points at a clip in voice/clips/ — see voice/clips.py
   const CHARACTERS = [
     // Vehicles
-    { emoji: '🚗',   namePlural: 'מכוניות',    voiceName: 'מכוניות' },
-    { emoji: '🚓',   namePlural: 'ניידות',     voiceName: 'ניידות משטרה' },
-    { emoji: '🚒',   namePlural: 'מכבי אש',    voiceName: 'משאיות כיבוי' },
-    { emoji: '🚛',   namePlural: 'משאיות',     voiceName: 'משאיות' },
-    { emoji: '🚕',   namePlural: 'מוניות',     voiceName: 'מוניות' },
-    { emoji: '🚌',   namePlural: 'אוטובוסים',  voiceName: 'אוטובוסים' },
-    { emoji: '🚑',   namePlural: 'אמבולנסים',  voiceName: 'אמבולנסים' },
-    { emoji: '🚀',   namePlural: 'חלליות',     voiceName: 'חלליות' },
+    { emoji: '🚗',   namePlural: 'מכוניות',    voiceId: 'ch_cars' },
+    { emoji: '🚓',   namePlural: 'ניידות',     voiceId: 'ch_police' },
+    { emoji: '🚒',   namePlural: 'מכבי אש',    voiceId: 'ch_firetruck' },
+    { emoji: '🚛',   namePlural: 'משאיות',     voiceId: 'ch_trucks' },
+    { emoji: '🚕',   namePlural: 'מוניות',     voiceId: 'ch_taxis' },
+    { emoji: '🚌',   namePlural: 'אוטובוסים',  voiceId: 'ch_buses' },
+    { emoji: '🚑',   namePlural: 'אמבולנסים',  voiceId: 'ch_ambulance' },
+    { emoji: '🚀',   namePlural: 'חלליות',     voiceId: 'ch_rockets' },
     // Paw Patrol / pups
-    { emoji: '🐶',   namePlural: 'כלבים',      voiceName: 'כלבים' },
-    { emoji: '🐕',   namePlural: 'גורים',      voiceName: 'גורים' },
+    { emoji: '🐶',   namePlural: 'כלבים',      voiceId: 'ch_dogs' },
+    { emoji: '🐕',   namePlural: 'גורים',      voiceId: 'ch_puppies' },
     // Heroes
-    { emoji: '🦸‍♂️', namePlural: 'גיבורים',    voiceName: 'גיבורים' },
-    { emoji: '🦸‍♀️', namePlural: 'גיבורות',    voiceName: 'גיבורות' },
+    { emoji: '🦸‍♂️', namePlural: 'גיבורים',    voiceId: 'ch_heroes_m' },
+    { emoji: '🦸‍♀️', namePlural: 'גיבורות',    voiceId: 'ch_heroes_f' },
     // Animals
-    { emoji: '🐰',   namePlural: 'ארנבים',     voiceName: 'ארנבים' },
-    { emoji: '🐱',   namePlural: 'חתולים',     voiceName: 'חתולים' },
-    { emoji: '🐻',   namePlural: 'דובים',      voiceName: 'דובים' },
-    { emoji: '🦊',   namePlural: 'שועלים',     voiceName: 'שועלים' },
-    { emoji: '🦁',   namePlural: 'אריות',      voiceName: 'אריות' },
-    { emoji: '🐯',   namePlural: 'נמרים',      voiceName: 'נמרים' },
-    { emoji: '🐸',   namePlural: 'צפרדעים',    voiceName: 'צפרדעים' },
-    { emoji: '🐮',   namePlural: 'פרות',       voiceName: 'פרות' },
-    { emoji: '🐷',   namePlural: 'חזירים',     voiceName: 'חזירים' },
-    { emoji: '🐵',   namePlural: 'קופים',      voiceName: 'קופים' },
-    { emoji: '🐘',   namePlural: 'פילים',      voiceName: 'פילים' },
-    { emoji: '🐼',   namePlural: 'פנדות',      voiceName: 'פנדות' },
-    { emoji: '🦒',   namePlural: 'ג׳ירפות',    voiceName: 'ג׳ירפות' },
-    { emoji: '🦋',   namePlural: 'פרפרים',     voiceName: 'פרפרים' },
-    { emoji: '🐧',   namePlural: 'פינגווינים', voiceName: 'פינגווינים' },
+    { emoji: '🐰',   namePlural: 'ארנבים',     voiceId: 'ch_rabbits' },
+    { emoji: '🐱',   namePlural: 'חתולים',     voiceId: 'ch_cats' },
+    { emoji: '🐻',   namePlural: 'דובים',      voiceId: 'ch_bears' },
+    { emoji: '🦊',   namePlural: 'שועלים',     voiceId: 'ch_foxes' },
+    { emoji: '🦁',   namePlural: 'אריות',      voiceId: 'ch_lions' },
+    { emoji: '🐯',   namePlural: 'נמרים',      voiceId: 'ch_tigers' },
+    { emoji: '🐸',   namePlural: 'צפרדעים',    voiceId: 'ch_frogs' },
+    { emoji: '🐮',   namePlural: 'פרות',       voiceId: 'ch_cows' },
+    { emoji: '🐷',   namePlural: 'חזירים',     voiceId: 'ch_pigs' },
+    { emoji: '🐵',   namePlural: 'קופים',      voiceId: 'ch_monkeys' },
+    { emoji: '🐘',   namePlural: 'פילים',      voiceId: 'ch_elephants' },
+    { emoji: '🐼',   namePlural: 'פנדות',      voiceId: 'ch_pandas' },
+    { emoji: '🦒',   namePlural: 'ג׳ירפות',    voiceId: 'ch_giraffes' },
+    { emoji: '🦋',   namePlural: 'פרפרים',     voiceId: 'ch_butterflies' },
+    { emoji: '🐧',   namePlural: 'פינגווינים', voiceId: 'ch_penguins' },
     // Bonus / collectibles
-    { emoji: '⭐',    namePlural: 'כוכבים',     voiceName: 'כוכבים' },
-    { emoji: '💎',   namePlural: 'יהלומים',    voiceName: 'יהלומים' },
+    { emoji: '⭐',    namePlural: 'כוכבים',     voiceId: 'ch_stars' },
+    { emoji: '💎',   namePlural: 'יהלומים',    voiceId: 'ch_gems' },
   ];
 
   const HOST_CHARACTERS = [
@@ -586,17 +614,9 @@
     '🐱','🦁','🐸','🐼','🐧','🦒','🐵','🦊'
   ];
 
-  // Hebrew feminine number words (matches collective counting)
-  const NUMBER_WORDS_F = ['אפס','אחת','שתיים','שלוש','ארבע','חמש','שש','שבע','שמונה','תשע','עשר'];
-
-  const CELEBRATION_LINES = [
-    'כל הכבוד אלון!','מצוין!','ואו, אלוף!','איזה גיבור!',
-    'יופי!','בדיוק נכון!','כל הכבוד!','נהדר!'
-  ];
-
-  const ENCOURAGE_LINES = [
-    'כמעט! עוד פעם.','ננסה שוב.','אופס, ננסה עוד פעם.'
-  ];
+  // Spoken lines are clip ids from the voice pack, not text — see voice/clips.py
+  const CELEBRATION_CLIPS = ['cel0','cel1','cel2','cel3','cel4','cel5','cel6','cel7'];
+  const ENCOURAGE_CLIPS   = ['enc0','enc1','enc2'];
 
   // ============ UTILS ============
   function randInt(min, max) {
@@ -625,6 +645,7 @@
       state.soundOn       = data.soundOn !== false;
       state.countMax      = data.countMax      || 3;
       state.addMax        = data.addMax        || 3;
+      state.subMax        = data.subMax        || 3;
       state.recogMax      = data.recogMax      || 5;
       state.syncCode      = data.syncCode      || null;
       state.lastUpdatedAt = data.lastUpdatedAt || 0;
@@ -637,6 +658,7 @@
         soundOn:       state.soundOn,
         countMax:      state.countMax,
         addMax:        state.addMax,
+        subMax:        state.subMax,
         recogMax:      state.recogMax,
         syncCode:      state.syncCode,
         lastUpdatedAt: state.lastUpdatedAt,
@@ -700,6 +722,7 @@
     state.badges        = cloud.badges        ?? state.badges;
     state.countMax      = cloud.countMax      ?? state.countMax;
     state.addMax        = cloud.addMax        ?? state.addMax;
+    state.subMax        = cloud.subMax        ?? state.subMax;
     state.recogMax      = cloud.recogMax      ?? state.recogMax;
     state.soundOn       = cloud.soundOn !== false;
     state.lastUpdatedAt = cloud.updatedAt     || state.lastUpdatedAt;
@@ -787,83 +810,134 @@
   }
   function playTap() { playTone(880, 0.08, 'sine', 0.07); }
 
-  // ============ SPEECH (TTS) ============
-  let hebrewVoice = null;
-  let voicesPromise = null;
+  // ============ SPEECH (pre-recorded clips) ============
+  // The game's vocabulary is closed, so every spoken word is a small AAC clip
+  // built by voice/build_voice.py, and sentences are assembled by playing clips
+  // back to back. No device TTS voice is involved, so it sounds identical on
+  // every phone — including the ones with no Hebrew voice installed at all.
+  const VOICE_DIR = 'voice/clips/';
+  const CLIP_GAP  = 0.08;   // seconds of air between words
+  const voiceClips = {};    // clip id -> AudioBuffer
+  let voiceManifest = null;
+  let activeSources = [];
+  let pendingSpeech = null; // held until iOS lets us start the AudioContext
 
-  function isHebrewVoice(v) {
-    if (!v) return false;
-    const lang = (v.lang || '').toLowerCase();
-    if (lang === 'he-il' || lang === 'he') return true;
-    if (lang.startsWith('he-') || lang.startsWith('he_')) return true;
-    if (lang === 'iw-il' || lang === 'iw') return true;
-    if (lang.startsWith('iw-') || lang.startsWith('iw_')) return true;
-    if (/carmit|hebrew|עברית/i.test(v.name || '')) return true;
-    return false;
+  async function loadVoicePack() {
+    const res = await fetch('voice/manifest.json');
+    if (!res.ok) throw new Error('manifest ' + res.status);
+    voiceManifest = await res.json();
+    const ctx = getCtx();
+    if (!ctx) throw new Error('no AudioContext');
+    await Promise.all(Object.keys(voiceManifest).map(async (id) => {
+      try {
+        const r = await fetch(VOICE_DIR + id + '.m4a');
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        voiceClips[id] = await ctx.decodeAudioData(await r.arrayBuffer());
+      } catch (e) {
+        console.warn('[alon] clip failed:', id, e.message);
+      }
+    }));
+    console.log('[alon] voice pack:', Object.keys(voiceClips).length, 'of',
+                Object.keys(voiceManifest).length, 'clips ready');
   }
-  function detectHebrewVoice() {
-    if (!window.speechSynthesis) return null;
-    const voices = speechSynthesis.getVoices();
-    const hebrew = voices.filter(isHebrewVoice);
-    if (hebrew.length === 0) return null;
-    return hebrew.find(v => v.localService) || hebrew[0];
+  const voiceReady = loadVoicePack().catch(e => {
+    console.warn('[alon] voice pack unavailable:', e.message);
+  });
+
+  function stopSpeech() {
+    // Drop onended first: stop() fires it, and a late callback from the line we
+    // just cut would switch off the character mid-way through the next one.
+    activeSources.forEach(s => { try { s.onended = null; s.stop(); } catch (e) {} });
+    activeSources = [];
+    pendingSpeech = null;
+    if (window.speechSynthesis) speechSynthesis.cancel();
+    const char = document.getElementById('character');
+    if (char) char.classList.remove('speaking');
   }
-  function initVoices() {
-    if (!window.speechSynthesis) return;
-    voicesPromise = new Promise((resolve) => {
-      let resolved = false;
-      const tryDetect = () => {
-        if (resolved) return;
-        const v = detectHebrewVoice();
-        if (v || speechSynthesis.getVoices().length > 0) {
-          hebrewVoice = v;
-          resolved = true;
-          console.log('[alon] Hebrew voice:', v ? `${v.name} (${v.lang})` : 'NOT FOUND. TTS disabled.');
-          resolve(v);
-        }
-      };
-      tryDetect();
-      if (!resolved) {
-        speechSynthesis.addEventListener('voiceschanged', tryDetect);
-        setTimeout(() => { if (!resolved) { hebrewVoice = detectHebrewVoice(); resolved = true; resolve(hebrewVoice); } }, 2000);
+
+  function say(ids) {
+    if (!state.soundOn) return;
+    const list = Array.isArray(ids) ? ids : [ids];
+    voiceReady.then(() => {
+      const ctx = getCtx();
+      if (!ctx) return;
+      stopSpeech();
+      if (ctx.state === 'suspended') {
+        // No user gesture yet — remember the line and play it once we're allowed.
+        pendingSpeech = list;
+        ctx.resume().then(flushPendingSpeech).catch(() => {});
+        return;
+      }
+      const bufs = list.map(id => voiceClips[id]);
+      if (bufs.some(b => !b)) return sayFallback(list);
+
+      const char = document.getElementById('character');
+      let t = ctx.currentTime + 0.05;
+      bufs.forEach(b => {
+        const srcNode = ctx.createBufferSource();
+        srcNode.buffer = b;
+        srcNode.connect(ctx.destination);
+        srcNode.start(t);
+        t += b.duration + CLIP_GAP;
+        activeSources.push(srcNode);
+      });
+      if (char && activeSources.length) {
+        char.classList.add('speaking');
+        activeSources[activeSources.length - 1].onended =
+          () => char.classList.remove('speaking');
       }
     });
   }
-  initVoices();
 
-  function speak(text, opts = {}) {
-    if (!state.soundOn) return;
-    if (!window.speechSynthesis) return;
-    (voicesPromise || Promise.resolve()).then(() => {
-      if (!hebrewVoice) return; // skip if no Hebrew voice rather than mispronounce
-      speechSynthesis.cancel();
-      const utt = new SpeechSynthesisUtterance(text);
-      utt.voice = hebrewVoice;
-      utt.lang  = hebrewVoice.lang || 'he-IL';
-      utt.pitch = opts.pitch ?? 1.2;   // slightly higher = more childlike/friendly
-      utt.rate  = opts.rate  ?? 0.95;
-      utt.volume = 1.0;
-      const char = document.getElementById('character');
-      utt.onstart = () => char && char.classList.add('speaking');
-      utt.onend   = () => char && char.classList.remove('speaking');
-      utt.onerror = () => char && char.classList.remove('speaking');
-      setTimeout(() => { try { speechSynthesis.speak(utt); } catch (e) {} }, 60);
-    });
+  function flushPendingSpeech() {
+    const p = pendingSpeech;
+    pendingSpeech = null;
+    if (p) say(p);
   }
+
+  // Only reached if a clip is missing from the pack — a robot voice beats silence.
+  function sayFallback(ids) {
+    if (!window.speechSynthesis || !voiceManifest) return;
+    const text = ids.map(id => (voiceManifest[id] || {}).text).filter(Boolean).join(' ');
+    if (!text) return;
+    const utt = new SpeechSynthesisUtterance(text);
+    const heb = speechSynthesis.getVoices().find(v => /^(he|iw)\b/i.test(v.lang || ''));
+    if (heb) { utt.voice = heb; utt.lang = heb.lang; } else { utt.lang = 'he-IL'; }
+    utt.pitch = 1.2;
+    utt.rate  = 0.95;
+    try { speechSynthesis.speak(utt); } catch (e) {}
+  }
+
   function speakNumber(n) {
-    if (n >= 0 && n <= 10) speak(NUMBER_WORDS_F[n], { pitch: 1.5, rate: 1.0 });
-    else speak(String(n));
+    if (n >= 0 && n <= 10) say('n' + n);
   }
+
+  // iOS blocks audio until a real gesture; the first touch anywhere releases it
+  // and replays whatever we were trying to say.
+  ['pointerdown', 'touchstart', 'keydown'].forEach(ev => {
+    document.addEventListener(ev, () => {
+      const ctx = getCtx();
+      if (ctx && ctx.state === 'suspended') ctx.resume().then(flushPendingSpeech).catch(() => {});
+    }, { once: true, passive: true });
+  });
 
   // ============ QUESTION GENERATION ============
   function pickQuestionType() {
-    // Weighted: 60% count, 30% recog, 10% add (start; shifts up as add difficulty rises)
-    const r = Math.random();
-    // Always-allow add only if we've shown some count first (sessionDots > 0 helps)
+    // Warm up with counting / recognition before any arithmetic.
     if (state.sessionDots < 2) return Math.random() < 0.7 ? 'count' : 'recog';
-    if (r < 0.55) return 'count';
-    if (r < 0.85) return 'recog';
-    return 'add';
+    // Subtraction stays locked until addition is comfortable — at 4 the
+    // "take away" idea only lands once "put together" is solid.
+    const subUnlocked = state.addMax >= 4;
+    const r = Math.random();
+    if (!subUnlocked) {
+      if (r < 0.55) return 'count';
+      if (r < 0.85) return 'recog';
+      return 'add';
+    }
+    if (r < 0.45) return 'count';
+    if (r < 0.70) return 'recog';
+    if (r < 0.88) return 'add';
+    return 'sub';
   }
 
   function genCountQuestion() {
@@ -877,7 +951,7 @@
       answer: n,
       character: ch,
       questionText: `כמה ${ch.namePlural} יש?`,
-      speech: `כמה ${ch.voiceName} יש?`,
+      speech: ['q_howmany', ch.voiceId, 'q_yesh'],
       options: genNumberOptions(n, 0, Math.max(max, n) + 1),
     };
   }
@@ -887,12 +961,11 @@
     let target;
     do { target = randInt(0, max); } while (`recog:${target}` === state.lastQuestionKey && max > 1);
     state.lastQuestionKey = `recog:${target}`;
-    const word = NUMBER_WORDS_F[target] || String(target);
     return {
       type: 'recog',
       answer: target,
       questionText: `איפה המספר ${target}?`,
-      speech: `איפה המספר ${word}?`,
+      speech: ['q_where_num', `n${target}`],
       options: genNumberOptions(target, 0, Math.min(10, max + 2)),
     };
   }
@@ -913,8 +986,34 @@
       answer: a + b,
       character: ch,
       questionText: `${a} ועוד ${b} ${ch.namePlural}?`,
-      speech: `${NUMBER_WORDS_F[a]} ${ch.voiceName}, ועוד ${NUMBER_WORDS_F[b]}, כמה יחד?`,
+      speech: [`n${a}`, ch.voiceId, 'q_plus', `n${b}`, 'q_together'],
       options: genNumberOptions(a + b, 0, Math.min(10, max + 1)),
+    };
+  }
+
+  function genSubQuestion() {
+    const max = Math.min(state.subMax, 10);
+    // Told as a story: some were here, some left, count what's still on screen.
+    let a, b;
+    do {
+      a = randInt(2, max);
+      // Clearing the whole set is a real case but a rare one — a leftover he can
+      // still count is what makes "taking away" click.
+      b = Math.random() < 0.15 ? a : randInt(1, a - 1);
+    } while (`sub:${a}-${b}` === state.lastQuestionKey);
+    state.lastQuestionKey = `sub:${a}-${b}`;
+    const ch = choice(CHARACTERS);
+    // One that leaves is הלכה, several are הלכו
+    const wentVerb = b === 1 ? 'הלכה' : 'הלכו';
+    const wentClip = b === 1 ? 'q_wentaway_one' : 'q_wentaway';
+    return {
+      type: 'sub',
+      a, b,
+      answer: a - b,
+      character: ch,
+      questionText: `היו ${a} ${ch.namePlural}, ${wentVerb} ${b}. כמה נשארו?`,
+      speech: ['q_were', `n${a}`, ch.voiceId, wentClip, `n${b}`, 'q_howmany_left'],
+      options: genNumberOptions(a - b, 0, Math.min(10, max)),
     };
   }
 
@@ -938,6 +1037,7 @@
     const type = pickQuestionType();
     if (type === 'count') return genCountQuestion();
     if (type === 'recog') return genRecogQuestion();
+    if (type === 'sub')   return genSubQuestion();
     return genAddQuestion();
   }
 
@@ -982,9 +1082,17 @@
       itemsArea.innerHTML = `${left}<div class="plus-sign-big">+</div>${right}`;
       attachCountTaps(itemsArea);
       renderNumberButtons(answersArea, q.options, q.answer);
+    } else if (q.type === 'sub') {
+      // The ones that stayed come first, so counting taps run over the answer.
+      const stay = repeatHtml(`<div class="item">${q.character.emoji}</div>`, q.answer);
+      const gone = repeatHtml(`<div class="item gone"><span class="glyph">${q.character.emoji}</span></div>`, q.b);
+      itemsArea.style.display = 'flex';
+      itemsArea.innerHTML = `<div class="group">${stay}${gone}</div>`;
+      attachCountTaps(itemsArea);
+      renderNumberButtons(answersArea, q.options, q.answer);
     }
 
-    speak(q.speech);
+    say(q.speech);
   }
 
   function renderItems(emoji, count, area) {
@@ -1008,7 +1116,7 @@
   let tapCounter = 0;
   function attachCountTaps(area) {
     tapCounter = 0;
-    area.querySelectorAll('.item').forEach(el => {
+    area.querySelectorAll('.item:not(.gone)').forEach(el => {
       el.addEventListener('click', () => {
         if (el.classList.contains('counted')) {
           // Replay the number for that item
@@ -1047,7 +1155,7 @@
     char.classList.remove('celebrate');
     void char.offsetWidth;
     char.classList.add('celebrate');
-    speak(choice(CELEBRATION_LINES), { pitch: 1.4, rate: 1.05 });
+    say(choice(CELEBRATION_CLIPS));
 
     // Bump per-type streaks & adaptive difficulty
     const q = state.currentQuestion;
@@ -1064,6 +1172,13 @@
       if (state.addStreak >= 3 && state.addMax < 10) {
         state.addMax++;
         state.addStreak = 0;
+      }
+    } else if (q.type === 'sub') {
+      state.subStreak++;
+      state.subWrongStreak = 0;
+      if (state.subStreak >= 3 && state.subMax < 10) {
+        state.subMax++;
+        state.subStreak = 0;
       }
     } else if (q.type === 'recog') {
       state.recogStreak++;
@@ -1105,6 +1220,13 @@
         state.addMax--;
         state.addWrongStreak = 0;
       }
+    } else if (q.type === 'sub') {
+      state.subStreak = 0;
+      state.subWrongStreak++;
+      if (state.subWrongStreak >= 2 && state.subMax > 2) {
+        state.subMax--;
+        state.subWrongStreak = 0;
+      }
     } else if (q.type === 'recog') {
       state.recogStreak = 0;
       state.recogWrongStreak++;
@@ -1115,7 +1237,7 @@
     }
     saveSave();
     // Gentle encouragement; let him try the same question again
-    speak(choice(ENCOURAGE_LINES), { pitch: 1.1, rate: 0.95 });
+    say(choice(ENCOURAGE_CLIPS));
   }
 
   function nextQuestion() {
@@ -1158,7 +1280,7 @@
       `סיימת ${SESSION_LENGTH} משימות! יש לך ${state.badges} מדליות 🏆`;
     document.getElementById('celebrationOverlay').classList.add('active');
     confettiBurst(80);
-    speak(`כל הכבוד אלון! סיימת את כל המשימות!`, { pitch: 1.3, rate: 1.0 });
+    say('session_done');
   }
   function continueAfterCelebration() {
     document.getElementById('celebrationOverlay').classList.remove('active');
@@ -1173,7 +1295,7 @@
     state.soundOn = !state.soundOn;
     document.getElementById('soundBtn').textContent = state.soundOn ? '🔊' : '🔇';
     saveSave();
-    if (!state.soundOn && window.speechSynthesis) speechSynthesis.cancel();
+    if (!state.soundOn) stopSpeech();
     if (state.soundOn) playTap();
   });
   document.getElementById('resetBtn').addEventListener('click', () => {
@@ -1185,11 +1307,11 @@
   });
   document.getElementById('syncBtn').addEventListener('click', showSyncSettings);
   document.getElementById('character').addEventListener('click', () => {
-    if (state.currentQuestion) speak(state.currentQuestion.speech);
+    if (state.currentQuestion) say(state.currentQuestion.speech);
   });
   document.getElementById('speakAgainBtn').addEventListener('click', (e) => {
     e.stopPropagation();
-    if (state.currentQuestion) speak(state.currentQuestion.speech);
+    if (state.currentQuestion) say(state.currentQuestion.speech);
   });
 
   loadSave();
