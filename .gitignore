@@ -15,3 +15,13 @@
 node_modules/
 package-lock.json
 *.log
+
+# Python bytecode from the voice-pack build script
+__pycache__/
+*.pyc
+
+# Voice-pack build output — regenerate with:
+#   cd alon-missions/voice && python3 make_audition.py
+#   cd alon-missions/voice && python3 variants.py build
+alon-missions/voice/audition.html
+alon-missions/voice/variants/
