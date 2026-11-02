@@ -11,6 +11,7 @@ import makeWASocket, {
   DisconnectReason,
   downloadMediaMessage,
   fetchLatestBaileysVersion,
+  fetchLatestWaWebVersion,
   getContentType,
   jidNormalizedUser,
   normalizeMessageContent,
@@ -95,7 +96,22 @@ async function handleMessages(messages) {
   }
 }
 
+// Group events arrive in bursts; one fetch per burst avoids WhatsApp's rate-overlimit.
+const GROUP_REFRESH_MIN_MS = 5 * 60 * 1000;
+let lastGroupRefresh = 0;
+let groupRefreshTimer = null;
+
+function scheduleGroupRefresh() {
+  if (groupRefreshTimer) return;
+  const wait = Math.max(0, lastGroupRefresh + GROUP_REFRESH_MIN_MS - Date.now());
+  groupRefreshTimer = setTimeout(() => {
+    groupRefreshTimer = null;
+    refreshGroups().catch((e) => logger.error(e));
+  }, wait);
+}
+
 async function refreshGroups() {
+  lastGroupRefresh = Date.now();
   const groups = Object.values(await sock.groupFetchAllParticipating()).map((g) => ({ jid: g.id, name: g.subject }));
   fs.writeFileSync(KNOWN_GROUPS_FILE, JSON.stringify(groups, null, 2));
   try {
@@ -111,7 +127,9 @@ async function refreshGroups() {
 
 async function connect() {
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
-  const { version } = await fetchLatestBaileysVersion();
+  // Baileys' own version list lags; WhatsApp refuses to link outdated clients.
+  const web = await fetchLatestWaWebVersion().catch(() => null);
+  const { version } = web?.isLatest ? web : await fetchLatestBaileysVersion();
   sock = makeWASocket({
     version,
     auth: state,
@@ -131,7 +149,10 @@ async function connect() {
     }
     if (connection === 'open') {
       console.log(`WhatsApp connected as ${sock.user?.id}`);
-      refreshGroups().catch((e) => logger.error(e));
+      refreshGroups().catch((e) => {
+        logger.error(e);
+        scheduleGroupRefresh();
+      });
     }
     if (connection === 'close') {
       const code = lastDisconnect?.error?.output?.statusCode;
@@ -147,8 +168,8 @@ async function connect() {
   sock.ev.on('messages.upsert', ({ messages }) => handleMessages(messages).catch((e) => logger.error(e)));
   sock.ev.on('messaging-history.set', ({ messages }) => handleMessages(messages).catch((e) => logger.error(e)));
   // Joined a group or a group was renamed.
-  sock.ev.on('groups.upsert', () => refreshGroups().catch((e) => logger.error(e)));
-  sock.ev.on('groups.update', () => refreshGroups().catch((e) => logger.error(e)));
+  sock.ev.on('groups.upsert', scheduleGroupRefresh);
+  sock.ev.on('groups.update', scheduleGroupRefresh);
 }
 
 // The only place the bridge ever sends a message; rules live in guards.mjs.

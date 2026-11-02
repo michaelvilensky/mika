@@ -38,6 +38,7 @@ Structure:
 5. A short section per kid with anything else worth knowing (what they learned, homework, teacher announcements). Skip a kid's section if there is nothing.
 
 Rules:
+- In sections 1–4, start every bullet with the kid it's about in bold ("*מיקה* – ", "*אלון* – "), or "*שניהם* – " when it concerns both. Never leave a bullet without a name; the parent scans by kid.
 - Ignore chit-chat, and other parents' questions that were answered — unless the answer matters.
 - Resolve relative dates ("מחר", "ביום חמישי") against the date each message was sent, and write absolute dates.
 - Read photos and PDFs: schedules, lists of items, and notices are often only in images.
