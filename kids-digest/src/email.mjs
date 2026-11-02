@@ -4,12 +4,26 @@ import { simpleParser } from 'mailparser';
 
 const MAX_BODY_CHARS = 20000;
 
-// senders: strings or { match, note } — match is a substring of the From line (address or display name).
-// Returns { note } when the email is school mail, or null.
+// senders: strings or { match, note } — match is an address, domain or display name in the From line.
+function senderRules(config) {
+  return (config.email.senders ?? []).map((s) => (typeof s === 'string' ? { match: s } : s));
+}
+
+// Gmail does the filtering, so mail from anyone else is never downloaded.
+export function gmailQuery(config, sinceTs) {
+  const quote = (s) => `"${s.replace(/"/g, '')}"`;
+  const terms = [
+    ...senderRules(config).map((s) => `from:${quote(s.match)}`),
+    ...(config.email.subjectKeywords ?? []).map((k) => `subject:${quote(k)}`),
+  ];
+  if (!terms.length) throw new Error('config.email has no senders or subjectKeywords — refusing to read the whole inbox');
+  return `(${terms.join(' OR ')}) after:${Math.floor(sinceTs / 1000)}`;
+}
+
+// Second check on what Gmail returned. Returns { note } when the email is school mail, or null.
 function matches(config, from, subject) {
-  const senders = (config.email.senders ?? []).map((s) => (typeof s === 'string' ? { match: s } : s));
+  const senders = senderRules(config);
   const keywords = config.email.subjectKeywords ?? [];
-  if (!senders.length && !keywords.length) return {};
   const f = from.toLowerCase();
   const sender = senders.find((s) => f.includes(s.match.toLowerCase()));
   if (sender) return { note: sender.note };
@@ -32,6 +46,7 @@ export async function fetchSchoolEmails(config, sinceTs) {
     console.warn('GMAIL_USER / GMAIL_APP_PASSWORD not set — skipping email.');
     return [];
   }
+  const query = gmailQuery(config, sinceTs);
   const client = new ImapFlow({
     host: 'imap.gmail.com',
     port: 993,
@@ -43,7 +58,9 @@ export async function fetchSchoolEmails(config, sinceTs) {
   const emails = [];
   const lock = await client.getMailboxLock(config.email.mailbox || 'INBOX', { readOnly: true });
   try {
-    for await (const msg of client.fetch({ since: new Date(sinceTs) }, { source: true, internalDate: true })) {
+    const uids = await client.search({ gmraw: query }, { uid: true });
+    if (!uids?.length) return emails;
+    for await (const msg of client.fetch(uids, { source: true, internalDate: true }, { uid: true })) {
       if (msg.internalDate.getTime() < sinceTs) continue;
       const parsed = await simpleParser(msg.source);
       const from = parsed.from?.text ?? '';

@@ -12,6 +12,7 @@
     "groups": "node --no-warnings=ExperimentalWarning src/cli.mjs groups",
     "digest": "node --no-warnings=ExperimentalWarning src/digest.mjs",
     "digest:dry": "node --no-warnings=ExperimentalWarning src/digest.mjs --dry-run",
+    "init": "node --no-warnings=ExperimentalWarning src/init.mjs",
     "install-launchd": "bash scripts/install-launchd.sh"
   },
   "dependencies": {

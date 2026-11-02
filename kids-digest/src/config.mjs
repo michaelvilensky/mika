@@ -9,12 +9,15 @@ export const AUTH_DIR = path.join(DATA_DIR, 'wa-auth');
 // Written by the bridge: every group you're in, as [{ jid, name }].
 export const KNOWN_GROUPS_FILE = path.join(DATA_DIR, 'groups.json');
 
+// Everything this process creates (WhatsApp session keys, messages, media, logs) is readable only by you.
+process.umask(0o077);
 for (const dir of [DATA_DIR, MEDIA_DIR]) fs.mkdirSync(dir, { recursive: true });
+fs.chmodSync(DATA_DIR, 0o700);
 
-try {
-  process.loadEnvFile(path.join(ROOT, '.env'));
-} catch (err) {
-  if (err.code !== 'ENOENT') throw err;
+const ENV_FILE = path.join(ROOT, '.env');
+if (fs.existsSync(ENV_FILE)) {
+  fs.chmodSync(ENV_FILE, 0o600);
+  process.loadEnvFile(ENV_FILE);
 }
 
 export const BRIDGE_PORT = Number(process.env.BRIDGE_PORT || 4873);

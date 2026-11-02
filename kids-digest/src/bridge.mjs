@@ -17,10 +17,11 @@ import makeWASocket, {
   useMultiFileAuthState,
 } from '@whiskeysockets/baileys';
 import {
-  AUTH_DIR, BRIDGE_PORT, BRIDGE_TOKEN, KNOWN_GROUPS_FILE, MEDIA_DIR,
+  AUTH_DIR, BRIDGE_PORT, BRIDGE_TOKEN, DATA_DIR, KNOWN_GROUPS_FILE, MEDIA_DIR,
   knownGroups, loadConfig, resolveGroups, watchedGroupJids,
 } from './config.mjs';
-import { saveMessage } from './db.mjs';
+import { getMeta, oldestMessage, saveMessage, setMeta } from './db.mjs';
+import { checkDailyLimit, checkDeliveryGroup, checkText } from './guards.mjs';
 
 const logger = pino({ level: process.env.LOG_LEVEL || 'warn' });
 let sock = null;
@@ -83,8 +84,9 @@ async function handleMessages(messages) {
     if (text == null) continue;
     const media = await saveMedia(msg, content);
     saveMessage({
-      id: `${chatJid}:${msg.key.id}`,
       chatJid,
+      waId: msg.key.id,
+      fromMe: msg.key.fromMe,
       sender: msg.key.fromMe ? 'אני' : msg.pushName || (msg.key.participant || '').split('@')[0],
       ts: Number(msg.messageTimestamp) * 1000,
       text,
@@ -149,14 +151,53 @@ async function connect() {
   sock.ev.on('groups.update', () => refreshGroups().catch((e) => logger.error(e)));
 }
 
-function deliveryJid() {
-  const { deliverTo } = loadConfig();
+// The only place the bridge ever sends a message; rules live in guards.mjs.
+const SENT_LOG = path.join(DATA_DIR, 'logs', 'sent.log');
+
+async function deliveryJid(config) {
+  const { deliverTo } = config;
   if (deliverTo === 'self') return jidNormalizedUser(sock.user.id);
-  if (deliverTo.endsWith('@g.us')) return deliverTo;
-  // A group name: resolve it the same way as the watched groups.
-  const [resolved] = resolveGroups([{ name: deliverTo }], knownGroups());
-  if (!resolved.jid) throw new Error(`deliverTo group "${deliverTo}" not found (or ambiguous)`);
-  return resolved.jid;
+  const jid = deliverTo.endsWith('@g.us') ? deliverTo : resolveGroups([{ name: deliverTo }], knownGroups())[0].jid;
+  const meta = jid ? await sock.groupMetadata(jid) : null;
+  checkDeliveryGroup({
+    jid,
+    subject: meta?.subject,
+    memberCount: meta?.participants.length ?? 0,
+    watchedJids: config.groups.map((g) => g.jid).filter(Boolean),
+  });
+  return jid;
+}
+
+async function sendDigest(text) {
+  checkText(text);
+  const config = loadConfig();
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: config.timezone });
+  const sentToday = Number(getMeta(`sent:${today}`) || 0);
+  checkDailyLimit(sentToday);
+  const jid = await deliveryJid(config);
+  await sock.sendMessage(jid, { text });
+  setMeta(`sent:${today}`, sentToday + 1);
+  fs.mkdirSync(path.dirname(SENT_LOG), { recursive: true });
+  fs.appendFileSync(SENT_LOG, `${new Date().toISOString()}\t${jid}\t${text.length} chars\t${text.split('\n')[0]}\n`);
+}
+
+// Ask your phone for older messages in each watched group, back to `days` ago.
+// Replies arrive asynchronously through 'messaging-history.set'. Needs the phone online.
+async function backfill(days) {
+  const since = Date.now() - days * 86400_000;
+  const results = [];
+  for (const g of loadConfig().groups.filter((g) => g.jid)) {
+    const oldest = oldestMessage(g.jid);
+    if (oldest && oldest.ts <= since) {
+      results.push({ group: g.name, status: 'already covered' });
+    } else if (!oldest) {
+      results.push({ group: g.name, status: 'no messages yet to anchor on' });
+    } else {
+      await sock.fetchMessageHistory(50, { remoteJid: g.jid, id: oldest.wa_id, fromMe: !!oldest.from_me }, oldest.ts);
+      results.push({ group: g.name, status: 'requested older messages' });
+    }
+  }
+  return results;
 }
 
 function readJson(req) {
@@ -187,9 +228,12 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.method === 'POST' && req.url === '/send') {
       const { text } = await readJson(req);
-      if (!text) return reply(400, { error: 'text required' });
-      await sock.sendMessage(deliveryJid(), { text });
+      await sendDigest(text);
       return reply(200, { ok: true });
+    }
+    if (req.method === 'POST' && req.url === '/backfill') {
+      const { days } = await readJson(req);
+      return reply(200, await backfill(Math.min(Math.max(Number(days) || 3, 1), 14)));
     }
     reply(404, { error: 'not found' });
   } catch (err) {

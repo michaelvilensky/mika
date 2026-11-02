@@ -8,6 +8,8 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS messages (
     id         TEXT PRIMARY KEY,
     chat_jid   TEXT NOT NULL,
+    wa_id      TEXT,
+    from_me    INTEGER,
     sender     TEXT,
     ts         INTEGER NOT NULL,
     text       TEXT,
@@ -19,18 +21,25 @@ db.exec(`
 `);
 
 const insert = db.prepare(`
-  INSERT OR IGNORE INTO messages (id, chat_jid, sender, ts, text, media_path, media_type)
-  VALUES (?, ?, ?, ?, ?, ?, ?)
+  INSERT OR IGNORE INTO messages (id, chat_jid, wa_id, from_me, sender, ts, text, media_path, media_type)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 
 export function saveMessage(m) {
-  insert.run(m.id, m.chatJid, m.sender ?? null, m.ts, m.text ?? null, m.mediaPath ?? null, m.mediaType ?? null);
+  insert.run(
+    `${m.chatJid}:${m.waId}`, m.chatJid, m.waId, m.fromMe ? 1 : 0, m.sender ?? null, m.ts,
+    m.text ?? null, m.mediaPath ?? null, m.mediaType ?? null,
+  );
 }
 
 export function messagesSince(chatJid, sinceTs) {
   return db
     .prepare('SELECT * FROM messages WHERE chat_jid = ? AND ts >= ? ORDER BY ts')
     .all(chatJid, sinceTs);
+}
+
+export function oldestMessage(chatJid) {
+  return db.prepare('SELECT * FROM messages WHERE chat_jid = ? ORDER BY ts LIMIT 1').get(chatJid) ?? null;
 }
 
 export function getMeta(key) {

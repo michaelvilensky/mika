@@ -27,6 +27,8 @@ fi
 HOUR="$("$NODE" -p "require('$ROOT/config.json').schedule?.hour ?? 19")"
 MINUTE="$("$NODE" -p "require('$ROOT/config.json').schedule?.minute ?? 30")"
 mkdir -p "$AGENTS" "$LOGS"
+chmod 700 "$ROOT/data"
+chmod 600 "$ROOT/.env"
 
 cat > "$AGENTS/com.kidsdigest.bridge.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
