@@ -1,0 +1,19 @@
+{
+  "kids": [
+    { "name": "מיקה", "grade": "כיתה ב'" },
+    { "name": "אלון", "grade": "גן חובה" }
+  ],
+  "groups": [
+    { "jid": "120363000000000001@g.us", "name": "הורי כיתה ב'2", "kid": "מיקה" },
+    { "jid": "120363000000000002@g.us", "name": "גן רימון - הורים", "kid": "אלון" }
+  ],
+  "email": {
+    "mailbox": "INBOX",
+    "senders": ["@school-domain.org.il", "mashov", "teacher.name@gmail.com"],
+    "subjectKeywords": ["כיתה ב", "גן"]
+  },
+  "deliverTo": "self",
+  "schedule": { "hour": 19, "minute": 30 },
+  "timezone": "Asia/Jerusalem",
+  "maxLookbackHours": 72
+}

@@ -1,0 +1,6 @@
+# Secrets and personal data — never commit
+.env
+config.json
+data/
+node_modules/
+package-lock.json
