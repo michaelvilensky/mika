@@ -17,7 +17,12 @@ const floor = now - config.maxLookbackHours * 3600_000;
 const sinceTs = Math.max(Number(getMeta('last_digest_ts')) || now - 24 * 3600_000, floor);
 
 console.log(`Collecting since ${new Date(sinceTs).toISOString()}`);
-const groupMessages = config.groups.map((group) => ({ group, messages: messagesSince(group.jid, sinceTs) }));
+for (const g of config.groups.filter((g) => !g.jid)) {
+  console.warn(`Group "${g.name}" isn't matched to a WhatsApp group — skipped (run npm run groups).`);
+}
+const groupMessages = config.groups
+  .filter((g) => g.jid)
+  .map((group) => ({ group, messages: messagesSince(group.jid, sinceTs) }));
 const emails = await fetchSchoolEmails(config, sinceTs);
 const waCount = groupMessages.reduce((n, g) => n + g.messages.length, 0);
 console.log(`${waCount} WhatsApp messages, ${emails.length} emails`);

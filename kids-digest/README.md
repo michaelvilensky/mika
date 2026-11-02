@@ -25,8 +25,14 @@ cp config.example.json config.json
    - `GMAIL_USER` / `GMAIL_APP_PASSWORD`: your personal Gmail and an [App Password](https://myaccount.google.com/apppasswords). Your account needs 2-Step Verification for this. The app password only gives IMAP access, and you can revoke it anytime.
    - `BRIDGE_TOKEN`: run `openssl rand -hex 24`.
 2. **Link WhatsApp.** Run `npm run bridge` and scan the QR code: WhatsApp → Settings → Linked devices → Link a device. Leave it running.
-3. **Pick the groups.** In a second terminal, run `npm run groups`. Copy the JIDs of the class and kindergarten groups into `config.json` → `groups`, and set `kid` on each one.
-4. **Email filters.** In `config.json` → `email.senders` (address or domain substrings) and `subjectKeywords`, set which emails count as school mail. If both are empty, all inbox mail is included.
+3. **Pick the groups.** In `config.json` → `groups`, list each group by its WhatsApp name, with its `kid` and `type`:
+   - `official`: staff to parents
+   - `grade`: grade-level announcements
+   - `afterschool`: the צהרון
+   - `parents`: the unofficial parents chat. Practical items and serious concerns (staff problems, bullying, safety, health) are kept; lost-and-found noise is skipped.
+
+   The bridge matches names when it connects. It ignores quote-mark and spacing differences, and the startup log says which groups matched. Run `npm run groups` in a second terminal to see all your groups, with ✓ next to the ones being watched.
+4. **Email filters.** In `config.json` → `email.senders`, list what to match in the From line: an address, a domain or a display name. You can add a `note` saying who the sender is. If `senders` and `subjectKeywords` are both empty, all inbox mail is included.
 5. **Test.** Wait for some messages to come in, then run `npm run digest:dry`. It prints the digest without sending it.
 6. **Go live.** Stop the foreground bridge (Ctrl+C) and run `npm run install-launchd`. The bridge now runs in the background and restarts on login. The digest runs daily at `schedule` in config.json.
 
@@ -36,7 +42,7 @@ cp config.example.json config.json
 - Send one now: `npm run digest`.
 - Change the time: edit `schedule` in config.json, then run `npm run install-launchd` again.
 - Uninstall: `bash scripts/install-launchd.sh --uninstall`.
-- Send the digest to a private group instead of "Message yourself", so you get a notification: create a group with just yourself, find its JID with `npm run groups`, and set `deliverTo` to it.
+- Send the digest to a group instead of "Message yourself": set `deliverTo` to the group's name. Your phone never notifies you about messages sent from your own account, including this one. Anyone else in the group (e.g. your partner) does get a notification.
 
 ## Notes
 

@@ -16,7 +16,10 @@ import makeWASocket, {
   normalizeMessageContent,
   useMultiFileAuthState,
 } from '@whiskeysockets/baileys';
-import { AUTH_DIR, BRIDGE_PORT, BRIDGE_TOKEN, MEDIA_DIR, loadConfig, watchedGroupJids } from './config.mjs';
+import {
+  AUTH_DIR, BRIDGE_PORT, BRIDGE_TOKEN, KNOWN_GROUPS_FILE, MEDIA_DIR,
+  knownGroups, loadConfig, resolveGroups, watchedGroupJids,
+} from './config.mjs';
 import { saveMessage } from './db.mjs';
 
 const logger = pino({ level: process.env.LOG_LEVEL || 'warn' });
@@ -90,6 +93,20 @@ async function handleMessages(messages) {
   }
 }
 
+async function refreshGroups() {
+  const groups = Object.values(await sock.groupFetchAllParticipating()).map((g) => ({ jid: g.id, name: g.subject }));
+  fs.writeFileSync(KNOWN_GROUPS_FILE, JSON.stringify(groups, null, 2));
+  try {
+    for (const g of loadConfig().groups) {
+      if (g.jid) console.log(`Watching: ${g.name}`);
+      else if (g.candidates?.length) console.warn(`"${g.name}" matches several groups: ${g.candidates.join(' | ')} — make the name more specific`);
+      else console.warn(`"${g.name}" not found among your WhatsApp groups — check the name (npm run groups)`);
+    }
+  } catch (err) {
+    console.warn(err.message);
+  }
+}
+
 async function connect() {
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
   const { version } = await fetchLatestBaileysVersion();
@@ -110,7 +127,10 @@ async function connect() {
       console.log('\nScan this QR in WhatsApp → Settings → Linked devices → Link a device:\n');
       qrcode.generate(qr, { small: true });
     }
-    if (connection === 'open') console.log(`WhatsApp connected as ${sock.user?.id}`);
+    if (connection === 'open') {
+      console.log(`WhatsApp connected as ${sock.user?.id}`);
+      refreshGroups().catch((e) => logger.error(e));
+    }
     if (connection === 'close') {
       const code = lastDisconnect?.error?.output?.statusCode;
       if (code === DisconnectReason.loggedOut) {
@@ -124,11 +144,19 @@ async function connect() {
 
   sock.ev.on('messages.upsert', ({ messages }) => handleMessages(messages).catch((e) => logger.error(e)));
   sock.ev.on('messaging-history.set', ({ messages }) => handleMessages(messages).catch((e) => logger.error(e)));
+  // Joined a group or a group was renamed.
+  sock.ev.on('groups.upsert', () => refreshGroups().catch((e) => logger.error(e)));
+  sock.ev.on('groups.update', () => refreshGroups().catch((e) => logger.error(e)));
 }
 
 function deliveryJid() {
-  const target = loadConfig().deliverTo;
-  return target === 'self' ? jidNormalizedUser(sock.user.id) : target;
+  const { deliverTo } = loadConfig();
+  if (deliverTo === 'self') return jidNormalizedUser(sock.user.id);
+  if (deliverTo.endsWith('@g.us')) return deliverTo;
+  // A group name: resolve it the same way as the watched groups.
+  const [resolved] = resolveGroups([{ name: deliverTo }], knownGroups());
+  if (!resolved.jid) throw new Error(`deliverTo group "${deliverTo}" not found (or ambiguous)`);
+  return resolved.jid;
 }
 
 function readJson(req) {

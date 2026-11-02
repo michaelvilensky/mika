@@ -7,6 +7,13 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_PDF_BYTES = 20 * 1024 * 1024;
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
 
+const GROUP_TYPE_LABELS = {
+  official: 'קבוצה רשמית — הודעות צוות',
+  grade: 'קבוצת שכבה רשמית',
+  afterschool: 'צהרון',
+  parents: 'קבוצת הורים לא רשמית',
+};
+
 function systemPrompt(config) {
   const kids = config.kids.map((k) => `- ${k.name}: ${k.grade}${k.notes ? ` (${k.notes})` : ''}`).join('\n');
   return `You write a daily digest for a busy parent about their kids' school and kindergarten.
@@ -16,14 +23,22 @@ ${kids}
 
 You receive the last day's messages from the class/kindergarten WhatsApp groups (with any photos or PDFs posted there) and school emails. Write the digest in Hebrew, formatted for WhatsApp: *bold* for headings, plain "•" bullets, no markdown headers, tables or links syntax. Keep it short enough to read in under a minute.
 
+Each WhatsApp group is labeled with its type:
+- "קבוצה רשמית" / "קבוצת שכבה" (official, staff → parents): every practical announcement matters — schedule, things to bring, events, requests.
+- "צהרון" (after-school program): pickup times, closures, schedule changes, things to bring, payments.
+- "קבוצת הורים לא רשמית" (parents chatting among themselves): read it for two things. (a) Practical items: money collections, gifts for staff, schedule info a parent passed on, decisions the parents are making. (b) Important concerns, even if only hinted at: problems with the teacher or staff, bullying, violence or a social problem among the kids, safety, health (lice, an illness going around), conflicts between parents, complaints to the school. Skip lost-and-found and logistics noise ("who took the bottle/shirt", "my kid came home with someone else's hat"), thank-you chains, "+1"s and birthday wishes.
+
+Emails from the school or the class teacher (summaries of the week, announcements) are official — treat them like the official groups.
+
 Structure:
 1. *✅ לפעולה* — concrete things the parent must do, each with the kid's name and the deadline if known (payments, forms to sign, replies to send, things to buy). Most urgent first. This is the most important section; don't miss anything a parent would be embarrassed to miss.
-2. *🎒 למחר* — what each kid needs to bring/wear tomorrow, and any schedule change (early dismissal, no school, trip, special day).
-3. *📅 תאריכים קרובים* — upcoming events/deadlines beyond tomorrow, with dates.
-4. A short section per kid with anything else worth knowing (what they learned, homework, teacher announcements). Skip a kid's section if there is nothing.
+2. *⚠️ חשוב לדעת* — the important concerns from the parents' groups (or anywhere else): what happened, which kid's group, and how serious it seems. Report it factually and say when it's one parent's claim. Skip the section when there is nothing.
+3. *🎒 למחר* — what each kid needs to bring/wear tomorrow, and any schedule change (early dismissal, no school, trip, special day, after-school closure).
+4. *📅 תאריכים קרובים* — upcoming events/deadlines beyond tomorrow, with dates.
+5. A short section per kid with anything else worth knowing (what they learned, homework, teacher announcements). Skip a kid's section if there is nothing.
 
 Rules:
-- Ignore chit-chat, thank-you chains, "+1"s, birthday wishes, and other parents' questions that were answered — unless the answer matters.
+- Ignore chit-chat, and other parents' questions that were answered — unless the answer matters.
 - Resolve relative dates ("מחר", "ביום חמישי") against the date each message was sent, and write absolute dates.
 - Read photos and PDFs: schedules, lists of items, and notices are often only in images.
 - Don't invent anything. If something is unclear, say so briefly ("לא ברור אם...").
@@ -70,7 +85,8 @@ export function buildContent(config, groupMessages, emails) {
 
   for (const { group, messages } of groupMessages) {
     if (!messages.length) continue;
-    buffer += `\n===== קבוצת וואטסאפ: ${group.name} (${group.kid}) =====\n`;
+    const typeLabel = GROUP_TYPE_LABELS[group.type] ?? 'קבוצה';
+    buffer += `\n===== וואטסאפ: ${group.name} (${group.kid} · ${typeLabel}) =====\n`;
     for (const m of messages) {
       const line = `[${fmtTime(m.ts, tz)}] ${m.sender}: ${m.text}`;
       if (m.media_path && fs.existsSync(m.media_path)) {
@@ -81,7 +97,7 @@ export function buildContent(config, groupMessages, emails) {
   }
 
   for (const e of emails) {
-    buffer += `\n===== אימייל =====\nמאת: ${e.from}\nנושא: ${e.subject}\nתאריך: ${fmtTime(e.date.getTime(), tz)}\n\n${e.body}\n`;
+    buffer += `\n===== אימייל${e.note ? ` (${e.note})` : ''} =====\nמאת: ${e.from}\nנושא: ${e.subject}\nתאריך: ${fmtTime(e.date.getTime(), tz)}\n\n${e.body}\n`;
     for (const a of e.attachments) {
       if (!attach(a.content, a.contentType, `(קובץ מצורף לאימייל: ${a.filename})`)) {
         buffer += `[קובץ מצורף שלא נקרא: ${a.filename}]\n`;

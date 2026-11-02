@@ -4,13 +4,18 @@
     { "name": "אלון", "grade": "גן חובה" }
   ],
   "groups": [
-    { "jid": "120363000000000001@g.us", "name": "הורי כיתה ב'2", "kid": "מיקה" },
-    { "jid": "120363000000000002@g.us", "name": "גן רימון - הורים", "kid": "אלון" }
+    { "name": "הורי כיתה ב'2", "kid": "מיקה", "type": "parents" },
+    { "name": "שכבה ב", "kid": "מיקה", "type": "grade" },
+    { "name": "צהרון ב'2", "kid": "מיקה", "type": "afterschool" },
+    { "name": "גן רימון", "kid": "אלון", "type": "official" }
   ],
   "email": {
     "mailbox": "INBOX",
-    "senders": ["@school-domain.org.il", "mashov", "teacher.name@gmail.com"],
-    "subjectKeywords": ["כיתה ב", "גן"]
+    "senders": [
+      { "match": "@school-domain.org.il", "note": "בית הספר — הודעה רשמית" },
+      { "match": "Teacher Name", "note": "המחנכת — סיכומים ועדכונים" }
+    ],
+    "subjectKeywords": []
   },
   "deliverTo": "self",
   "schedule": { "hour": 19, "minute": 30 },

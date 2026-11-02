@@ -4,12 +4,16 @@ import { simpleParser } from 'mailparser';
 
 const MAX_BODY_CHARS = 20000;
 
+// senders: strings or { match, note } — match is a substring of the From line (address or display name).
+// Returns { note } when the email is school mail, or null.
 function matches(config, from, subject) {
-  const senders = config.email.senders ?? [];
+  const senders = (config.email.senders ?? []).map((s) => (typeof s === 'string' ? { match: s } : s));
   const keywords = config.email.subjectKeywords ?? [];
-  if (!senders.length && !keywords.length) return true;
+  if (!senders.length && !keywords.length) return {};
   const f = from.toLowerCase();
-  return senders.some((s) => f.includes(s.toLowerCase())) || keywords.some((k) => subject.includes(k));
+  const sender = senders.find((s) => f.includes(s.match.toLowerCase()));
+  if (sender) return { note: sender.note };
+  return keywords.some((k) => subject.includes(k)) ? {} : null;
 }
 
 function stripQuoted(text) {
@@ -44,10 +48,12 @@ export async function fetchSchoolEmails(config, sinceTs) {
       const parsed = await simpleParser(msg.source);
       const from = parsed.from?.text ?? '';
       const subject = parsed.subject ?? '';
-      if (!matches(config, from, subject)) continue;
+      const match = matches(config, from, subject);
+      if (!match) continue;
       let body = stripQuoted(parsed.text || '');
       if (body.length > MAX_BODY_CHARS) body = `${body.slice(0, MAX_BODY_CHARS)}\n[...ההודעה קוצרה]`;
       emails.push({
+        note: match.note,
         from,
         subject,
         date: msg.internalDate,
