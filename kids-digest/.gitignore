@@ -1,0 +1,8 @@
+# Secrets and personal data — never commit
+.env
+config.json
+data/
+node_modules/
+
+# Commit the lockfile (the repo root ignores lockfiles) so installs use the exact reviewed versions: npm ci
+!package-lock.json

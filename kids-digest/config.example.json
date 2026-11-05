@@ -1,0 +1,26 @@
+{
+  "kids": [
+    { "name": "מיקה", "grade": "כיתה ב'" },
+    { "name": "אלון", "grade": "גן חובה" }
+  ],
+  "groups": [
+    { "name": "הורי כיתה ב'2", "kid": "מיקה", "type": "parents" },
+    { "name": "שכבה ב", "kid": "מיקה", "type": "grade" },
+    { "name": "צהרון ב'2", "kid": "מיקה", "type": "afterschool" },
+    { "name": "גן רימון", "kid": "אלון", "type": "official" }
+  ],
+  "email": {
+    "mailbox": "INBOX",
+    "senders": [
+      { "match": "@school-domain.org.il", "note": "בית הספר — הודעה רשמית" },
+      { "match": "Teacher Name", "note": "המחנכת — סיכומים ועדכונים" }
+    ],
+    "subjectKeywords": []
+  },
+  "assistant": { "enabled": true, "allowedNumbers": [], "maxDailyUsd": 1.5 },
+  "deliverTo": "self",
+  "schedule": { "hour": 15, "minute": 0 },
+  "reminder": { "hour": 18, "minute": 30 },
+  "timezone": "Asia/Jerusalem",
+  "maxLookbackHours": 72
+}

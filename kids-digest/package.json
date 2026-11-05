@@ -1,0 +1,29 @@
+{
+  "name": "kids-digest",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Daily Hebrew digest + action items from the kids' school WhatsApp groups and emails",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "bridge": "node --no-warnings=ExperimentalWarning src/bridge.mjs",
+    "groups": "node --no-warnings=ExperimentalWarning src/cli.mjs groups",
+    "digest": "node --no-warnings=ExperimentalWarning src/digest.mjs",
+    "digest:dry": "node --no-warnings=ExperimentalWarning src/digest.mjs --dry-run",
+    "reminder": "node --no-warnings=ExperimentalWarning src/reminder.mjs",
+    "init": "node --no-warnings=ExperimentalWarning src/init.mjs",
+    "install-launchd": "bash scripts/install-launchd.sh",
+    "install-systemd": "bash scripts/install-systemd.sh",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.3.0",
+    "@whiskeysockets/baileys": "7.0.0-rc14",
+    "imapflow": "2.10.0",
+    "mailparser": "3.14.1",
+    "pino": "9.14.0",
+    "qrcode-terminal": "0.12.0"
+  }
+}
