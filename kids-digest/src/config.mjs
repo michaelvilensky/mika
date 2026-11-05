@@ -6,6 +6,7 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 export const DATA_DIR = path.join(ROOT, 'data');
 export const MEDIA_DIR = path.join(DATA_DIR, 'media');
 export const AUTH_DIR = path.join(DATA_DIR, 'wa-auth');
+export const EMAIL_FILES_DIR = path.join(DATA_DIR, 'email-files');
 // Written by the bridge: every group you're in, as [{ jid, name }].
 export const KNOWN_GROUPS_FILE = path.join(DATA_DIR, 'groups.json');
 
@@ -23,18 +24,34 @@ if (fs.existsSync(ENV_FILE)) {
 export const BRIDGE_PORT = Number(process.env.BRIDGE_PORT || 4873);
 export const BRIDGE_TOKEN = process.env.BRIDGE_TOKEN || '';
 
-export function loadConfig() {
-  const file = path.join(ROOT, 'config.json');
-  if (!fs.existsSync(file)) {
-    throw new Error(`Missing ${file} — copy config.example.json to config.json and fill it in.`);
+const CONFIG_FILE = path.join(ROOT, 'config.json');
+
+export function readRawConfig() {
+  if (!fs.existsSync(CONFIG_FILE)) {
+    throw new Error(`Missing ${CONFIG_FILE} — copy config.example.json to config.json and fill it in.`);
   }
-  const config = JSON.parse(fs.readFileSync(file, 'utf8'));
+  return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+}
+
+// Keeps a timestamped backup in data/config-backups, then replaces config.json atomically.
+export function writeRawConfig(raw) {
+  const backups = path.join(DATA_DIR, 'config-backups');
+  fs.mkdirSync(backups, { recursive: true });
+  fs.copyFileSync(CONFIG_FILE, path.join(backups, `${new Date().toISOString().replace(/:/g, '-')}.json`));
+  const tmp = `${CONFIG_FILE}.tmp`;
+  fs.writeFileSync(tmp, `${JSON.stringify(raw, null, 2)}\n`);
+  fs.renameSync(tmp, CONFIG_FILE);
+}
+
+export function loadConfig() {
+  const config = readRawConfig();
   config.groups ??= [];
   config.kids ??= [];
   config.deliverTo ??= 'self';
   config.timezone ??= 'Asia/Jerusalem';
   config.maxLookbackHours ??= 72;
   config.email ??= {};
+  config.assistant = { enabled: true, allowedNumbers: [], ...config.assistant };
   config.groups = resolveGroups(config.groups, knownGroups());
   return config;
 }
@@ -63,10 +80,23 @@ export function resolveGroups(groups, known) {
   });
 }
 
+// Stored media paths may come from another machine (e.g. the Mac before the move); look files up by name.
+export function mediaFile(storedPath) {
+  return storedPath ? path.join(MEDIA_DIR, path.basename(storedPath)) : null;
+}
+
 export function watchedGroupJids() {
   try {
     return new Set(loadConfig().groups.map((g) => g.jid).filter(Boolean));
   } catch {
     return new Set();
   }
+}
+
+// The Kids Digest group's jid, from the saved group list (no WhatsApp call).
+export function deliveryGroupJid(config) {
+  const { deliverTo } = config;
+  if (deliverTo === 'self') return null;
+  if (deliverTo.endsWith('@g.us')) return deliverTo;
+  return resolveGroups([{ name: deliverTo }], knownGroups())[0].jid;
 }

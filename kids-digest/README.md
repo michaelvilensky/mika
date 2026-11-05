@@ -43,24 +43,45 @@ cp config.example.json config.json
 `npm run install-launchd` registers two macOS launchd agents. launchd is the built-in way to run background jobs, so no extra software is needed.
 
 - `com.kidsdigest.bridge`: starts at login and restarts if it crashes.
-- `com.kidsdigest.digest`: runs daily at `schedule` (19:30). If the Mac was asleep then, it runs on wake.
+- `com.kidsdigest.digest`: runs daily at `schedule`. If the Mac was asleep then, it runs on wake.
+- `com.kidsdigest.reminder`: at `reminder` (18:30), re-sends the "✅ לפעולה" items from that day's digest. If there were none, it sends nothing. Remove `reminder` from `config.json` and re-run the install to turn it off.
 
 The Mac must be awake to receive messages and send on time. A sleeping Mac or a closed laptop runs nothing; messages are caught up on wake. On a laptop that stays plugged in, turn on System Settings → Battery → Options → "Prevent automatic sleeping on power adapter when the display is off".
 
 Day to day:
-- Logs: `data/logs/bridge.log`, `data/logs/digest.log`, and `data/logs/sent.log` (every message the bridge sent). Every digest is also saved in `data/digests/`.
+- Logs: `data/logs/bridge.log`, `data/logs/digest.log`, `data/logs/sent.log` (every message the bridge sent) and `data/logs/assistant.log` (every request, its action and cost). Every digest is also saved in `data/digests/`.
 - Send one now: `npm run digest`, or print one without sending: `npm run digest:dry`.
-- Change the time: edit `schedule`, then run `npm run install-launchd` again.
+- Change the time: write "שנה את שעת הסיכום ל-18:00" in the Kids Digest group, or edit `schedule` and run `npm run install-launchd` again.
+- Tests for the guardrails: `npm test`.
+
+## Asking questions in the Kids Digest group
+
+Write in the Kids Digest group and the bridge answers there, with replies starting with 🤖. "עזרה" lists what it can do:
+- **Questions** about the last 14 days of the watched groups, school emails and recent digests: "מה מיקה צריכה להביא מחר?", "מה כתבו בקבוצת ההורים על הצהרון?". Follow-ups like "ואלון?" work for 30 minutes.
+- **Commands:** "שלח סיכום עכשיו", "דלג על הסיכום היום" / "בטל דילוג", "סטטוס", "אילו קבוצות במעקב?".
+- **Settings changes**, which wait for your "כן": "שנה את שעת הסיכום ל-18:00", "הוסף את הקבוצה X כקבוצת הורים של אלון", "הסר את הקבוצה X".
+- **Kill switch:** "עצור" pauses the assistant completely (the daily digest keeps running), and "המשך" turns it back on. To turn it off for good, set `assistant.enabled` to `false` in `config.json`.
+
+A question takes about 10 seconds and typically costs $0.02 to $0.15. Emails are refreshed in the background every 20 minutes, because Gmail is slow.
 - Uninstall: `bash scripts/install-launchd.sh --uninstall`.
+
+**On Linux** (a server or a Raspberry Pi), use `npm run install-systemd` instead. It installs the same three jobs as systemd user units. Run `sudo loginctl enable-linger $USER` once first, so they keep running when you're logged out. If the machine is off at the scheduled time, the job runs when it boots. Check them with `systemctl --user list-timers` and `systemctl --user status kids-digest-bridge`.
 
 ## Guardrails
 
-**Claude can't do anything.** It gets the messages as text and returns text. It has no tools and no access to your accounts. It's told to ignore instructions inside messages, so a malicious message can at most distort the summary.
+**Claude can't do anything on its own.** The digest and the answers to questions come from calls that get the messages as text and return text. They have no tools and no access to your accounts. They're told to ignore instructions inside messages, so a malicious message can at most distort a summary or an answer.
 
-**Sending.** All sends go through `sendDigest` in [src/bridge.mjs](src/bridge.mjs); nothing else in the code sends. The rules are in [src/guards.mjs](src/guards.mjs):
+**Requests in the Kids Digest group** ([src/assistant.mjs](src/assistant.mjs)):
+- **Only you.** Only messages from your own account count, plus numbers you add to `assistant.allowedNumbers`. Everyone else is ignored and logged. Only plain text written in the last 10 minutes counts, never the bot's own replies or digests, so it can't answer itself in a loop.
+- **The model that picks the action never sees group data.** A first call sees only your own messages and picks one action from a fixed list. A separate, tool-less call reads the group data and writes the answer. Text inside a class group therefore can't trigger an action.
+- **Actions are fixed and checked in code.** The digest time must be between 06:00 and 22:59. A group being added must exist, be new, not be Kids Digest, and name a kid and a group type. Changing where the digest goes, email settings, or any limit isn't possible from chat. Settings changes need a "כן" from you within 10 minutes. `config.json` is backed up to `data/config-backups/` before each change.
+- **Limits:** 30 replies a day (separate from the digest's 3), 10 requests an hour, $1.50 a day of estimated API cost (`assistant.maxDailyUsd`), requests up to 1,000 characters, and at most 3 queued. When a limit is hit it says so once, then stays quiet.
+- **Kill switch:** "עצור" and "המשך" are handled without calling Claude and bypass the limits, so they always work.
+
+**Sending.** All sends go through `sendDigest` and `sendReply` in [src/bridge.mjs](src/bridge.mjs); nothing else in the code sends. The rules are in [src/guards.mjs](src/guards.mjs):
 - It sends only to `deliverTo` (Kids Digest).
 - It refuses if that is one of the watched class groups, or a group with more than 3 members.
-- At most 3 messages a day, each up to 10,000 characters.
+- At most 3 digests (including the reminder) and 30 replies a day, each up to 10,000 characters.
 - Every send is logged to `data/logs/sent.log`.
 - Its control interface listens only on your own Mac (127.0.0.1) and requires `BRIDGE_TOKEN`.
 
@@ -79,6 +100,6 @@ Day to day:
 
 ## Notes
 
-- **Unofficial API.** The bridge uses [Baileys](https://github.com/WhiskeySockets/Baileys), a reverse-engineered WhatsApp Web client. It reads, and posts about one message a day to your own group, which is low-risk. Still, WhatsApp's terms don't allow unofficial clients.
+- **Unofficial API.** The bridge uses [Baileys](https://github.com/WhiskeySockets/Baileys), a reverse-engineered WhatsApp Web client. It reads, and posts only to your own small group: the digest plus replies to you, which is low-risk. Still, WhatsApp's terms don't allow unofficial clients.
 - **Privacy.** Messages are stored locally and sent only to the Claude API to make the digest. The ntfy ping is a generic "digest ready" line, never the content.
-- **Cost.** About one Opus 5.5 call per day. Typically a few cents, more when there are many photos.
+- **Cost.** About one Opus 5.5 call per day for the digest. Typically a few cents, more when there are many photos. Questions add about $0.02 to $0.15 each, capped at $1.50 a day.

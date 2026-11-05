@@ -17,8 +17,10 @@
     ],
     "subjectKeywords": []
   },
+  "assistant": { "enabled": true, "allowedNumbers": [], "maxDailyUsd": 1.5 },
   "deliverTo": "self",
-  "schedule": { "hour": 19, "minute": 30 },
+  "schedule": { "hour": 15, "minute": 0 },
+  "reminder": { "hour": 18, "minute": 30 },
   "timezone": "Asia/Jerusalem",
   "maxLookbackHours": 72
 }

@@ -40,7 +40,8 @@ function stripQuoted(text) {
     .trim();
 }
 
-export async function fetchSchoolEmails(config, sinceTs) {
+// known: optional Map uid → email (or null for non-school mail) from earlier calls; those aren't downloaded again.
+export async function fetchSchoolEmails(config, sinceTs, known = new Map()) {
   const { GMAIL_USER, GMAIL_APP_PASSWORD } = process.env;
   if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
     console.warn('GMAIL_USER / GMAIL_APP_PASSWORD not set — skipping email.');
@@ -58,18 +59,27 @@ export async function fetchSchoolEmails(config, sinceTs) {
   const emails = [];
   const lock = await client.getMailboxLock(config.email.mailbox || 'INBOX', { readOnly: true });
   try {
-    const uids = await client.search({ gmraw: query }, { uid: true });
-    if (!uids?.length) return emails;
-    for await (const msg of client.fetch(uids, { source: true, internalDate: true }, { uid: true })) {
+    const uids = (await client.search({ gmraw: query }, { uid: true })) || [];
+    for (const uid of uids) {
+      const email = known.get(uid);
+      if (email && email.date.getTime() >= sinceTs) emails.push(email);
+    }
+    const fresh = uids.filter((uid) => !known.has(uid));
+    if (!fresh.length) return emails;
+    for await (const msg of client.fetch(fresh, { source: true, internalDate: true }, { uid: true })) {
       if (msg.internalDate.getTime() < sinceTs) continue;
       const parsed = await simpleParser(msg.source);
       const from = parsed.from?.text ?? '';
       const subject = parsed.subject ?? '';
       const match = matches(config, from, subject);
-      if (!match) continue;
+      if (!match) {
+        known.set(msg.uid, null);
+        continue;
+      }
       let body = stripQuoted(parsed.text || '');
       if (body.length > MAX_BODY_CHARS) body = `${body.slice(0, MAX_BODY_CHARS)}\n[...ההודעה קוצרה]`;
       emails.push({
+        uid: msg.uid,
         note: match.note,
         from,
         subject,

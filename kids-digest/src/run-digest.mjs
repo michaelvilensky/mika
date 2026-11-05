@@ -9,7 +9,29 @@ import { summarize } from './summarize.mjs';
 import { bridge } from './bridge-client.mjs';
 import { notifyPhone } from './notify.mjs';
 
-export async function runDigest({ sinceTs, title, dryRun = false }) {
+const LOCK_FILE = path.join(DATA_DIR, 'digest.lock');
+const STALE_LOCK_MS = 15 * 60 * 1000;
+
+// One digest at a time (the schedule and "שלח סיכום עכשיו" could overlap).
+function acquireLock() {
+  try {
+    if (Date.now() - fs.statSync(LOCK_FILE).mtimeMs < STALE_LOCK_MS) throw new Error('Another digest is already running.');
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err;
+  }
+  fs.writeFileSync(LOCK_FILE, String(process.pid));
+}
+
+export async function runDigest(options) {
+  acquireLock();
+  try {
+    await buildAndSend(options);
+  } finally {
+    fs.rmSync(LOCK_FILE, { force: true });
+  }
+}
+
+async function buildAndSend({ sinceTs, title, dryRun = false }) {
   const config = loadConfig();
   const now = Date.now();
 

@@ -12,8 +12,11 @@
     "groups": "node --no-warnings=ExperimentalWarning src/cli.mjs groups",
     "digest": "node --no-warnings=ExperimentalWarning src/digest.mjs",
     "digest:dry": "node --no-warnings=ExperimentalWarning src/digest.mjs --dry-run",
+    "reminder": "node --no-warnings=ExperimentalWarning src/reminder.mjs",
     "init": "node --no-warnings=ExperimentalWarning src/init.mjs",
-    "install-launchd": "bash scripts/install-launchd.sh"
+    "install-launchd": "bash scripts/install-launchd.sh",
+    "install-systemd": "bash scripts/install-systemd.sh",
+    "test": "node --test test/*.test.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "1.3.0",
